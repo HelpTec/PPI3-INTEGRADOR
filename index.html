@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Juegos de PlayStation</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1>Juegos de PlayStation</h1>
+    </header>
+
+    <main>
+      <div id="games-container" class="cards-container">
+        <!-- Aquí se cargan las cards -->
+      </div>
+      <button id="load-more">Cargar más</button>
+    </main>
+
+    <script>
+      const games = [
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/7/7e/Uncharted_Drake%27s_Fortune_Cover.jpg",
+          titulo: "Uncharted: Drake's Fortune",
+          anio: 2007,
+          genero: "Aventura",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/8/8f/The_Last_of_Us.jpg",
+          titulo: "The Last of Us",
+          anio: 2013,
+          genero: "Acción, Aventura",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/5/52/God_of_War_4_cover.jpg",
+          titulo: "God of War",
+          anio: 2018,
+          genero: "Acción",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/e/e0/Spider-Man_PS4_cover.jpg",
+          titulo: "Marvel's Spider-Man",
+          anio: 2018,
+          genero: "Acción",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/f/f7/Bloodborne_Cover_Art.jpg",
+          titulo: "Bloodborne",
+          anio: 2015,
+          genero: "Rol, Acción",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/6/60/Persona_5_cover_art.jpg",
+          titulo: "Persona 5",
+          anio: 2016,
+          genero: "RPG",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/1/10/Final_Fantasy_VII_Remake_cover_art.jpg",
+          titulo: "Final Fantasy VII Remake",
+          anio: 2020,
+          genero: "RPG",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/1/14/Death_Stranding_Cover_Art.jpg",
+          titulo: "Death Stranding",
+          anio: 2019,
+          genero: "Aventura, Acción",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/3/35/Gran_Turismo_7_cover_art.jpg",
+          titulo: "Gran Turismo 7",
+          anio: 2022,
+          genero: "Carreras",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/9/92/Horizon_Forbidden_West_Cover_Art.jpg",
+          titulo: "Horizon Forbidden West",
+          anio: 2022,
+          genero: "Acción, Aventura",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/e/e2/Spider-Man_Miles_Morales_cover_art.jpg",
+          titulo: "Spider-Man: Miles Morales",
+          anio: 2020,
+          genero: "Acción",
+        },
+        {
+          portada:
+            "https://upload.wikimedia.org/wikipedia/en/8/80/Until_Dawn_cover_art.jpg",
+          titulo: "Until Dawn",
+          anio: 2015,
+          genero: "Terror, Aventura",
+        },
+        // Podés agregar más juegos acá
+      ];
+
+      const container = document.getElementById("games-container");
+      const loadMoreBtn = document.getElementById("load-more");
+      const pageSize = 8;
+      let currentPage = 0;
+
+      function renderGames() {
+        const start = currentPage * pageSize;
+        const end = start + pageSize;
+        const gamesToShow = games.slice(start, end);
+
+        gamesToShow.forEach((game) => {
+          const card = document.createElement("div");
+          card.className = "card";
+
+          card.innerHTML = `
+          <img src="${game.portada}" alt="Portada de ${game.titulo}" />
+          <div class="card-info">
+            <h2>${game.titulo}</h2>
+            <p><strong>Año:</strong> ${game.anio}</p>
+            <p><strong>Género:</strong> ${game.genero}</p>
+          </div>
+        `;
+
+          container.appendChild(card);
+        });
+
+        currentPage++;
+
+        if (currentPage * pageSize >= games.length) {
+          loadMoreBtn.style.display = "none";
+        }
+      }
+
+      loadMoreBtn.addEventListener("click", renderGames);
+
+      // Cargar la primera página al inicio
+      renderGames();
+    </script>
+  </body>
+</html>
