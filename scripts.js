@@ -29,7 +29,6 @@ function renderGames() {
     card.className = "card";
 
     card.innerHTML = `
-        //   <img src="${game.image}" alt="Portada de ${game.title}" />
         <img src="./recursos/tech_diff.png" alt="Portada de ${game.title}" />
           <div class="card-info">
             <h2>${game.title}</h2>
