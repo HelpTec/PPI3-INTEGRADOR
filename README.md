@@ -8,8 +8,8 @@ https://www.figma.com/design/zlhrbHjXVQvIa3nRkl8iRL/Inventario-Juegos?node-id=0-
 Link a Trello:
 https://trello.com/b/QW7cn5ch/ppi2-tp3-grupo-3
 
-Link a minuta:
+Link a minuta: https://docs.google.com/document/d/17HYPCR3TJa0am82yZSlufUNVLnFlhk4Aqx6s1UgLBwo/edit?pli=1&tab=t.0
 
 Link a casos de uso:
 
-Link a texto descriptivo del proyecto:
+Link a texto descriptivo del proyecto: https://docs.google.com/document/d/11Qe2bSqGOx7W_UvtJo15sN2sc5ofwtq_bZfuXuOqs0I/edit?pli=1&tab=t.0
