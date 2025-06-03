@@ -1,7 +1,7 @@
 from django.db import models
 
 class Juego(models.Model):
-    Rank = models.IntegerField(max_length=10)
+    Rank = models.IntegerField
     Name = models.CharField(max_length=100)
     Platform = models.CharField(max_length=50)
     Year = models.DateField()

@@ -1,4 +1,5 @@
 {% extends "index.html" %}
+{% load static %}
 {% block content %}
 <style>
       body {
@@ -149,14 +150,24 @@
     <div class="container-fluid main-content">
       <div class="left-panel">
         <div class="gamebase-logo">
-          <img src="./recursos/logoGB.png" alt="GameBase Logo" />
+          <img src="{% static 'img/logoGB.png' %}" alt="GameBase Logo" />
           <h2>GameBase</h2>
         </div>
         <h2>Ingresar</h2>
       </div>
 
       <div class="right-panel">
-        <form>
+        {% if messages %}
+        <ul class="messages">
+        {% for message in messages %}
+          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+        {{ message }}
+          </li>
+         {% endfor %}
+         </ul>
+        {% endif %}
+        <form method="post">
+          {% csrf_token %}
           <div class="mb-3">
             <label for="inputEmail" class="form-label visually-hidden"
               >Correo electrónico</label
@@ -167,8 +178,9 @@
               ></span>
               <input
                 type="email"
+                name="username"
                 class="form-control form-control-dark"
-                id="inputEmail"
+                id="username"
                 placeholder="Correo electrónico"
                 required
               />
@@ -184,8 +196,9 @@
               ></span>
               <input
                 type="password"
+                name="password"
                 class="form-control form-control-dark"
-                id="inputPassword"
+                id="password"
                 placeholder="Contraseña"
                 required
               />
