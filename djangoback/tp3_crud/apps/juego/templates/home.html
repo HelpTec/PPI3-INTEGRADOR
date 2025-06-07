@@ -1,20 +1,41 @@
 {% extends "base.html" %}
 {% load static %}
 {% block page_content %}
+
+<style>
+  #off {
+  display: none;
+ }
+</style>
 <main>
       <div id="games-container" class="cards-container">
         {% for juego in juegos %}
-        <div class="card">
+        <div class="card" id="{% if forloop.counter0 < 5 %}on{% else %}off{% endif %}">
           <img src= "{% static 'img/tech_diff.png'%}" alt="Portada de {{juego.Name}}" />
             <div class="card-info">
               <h2>{{juego.Name}}</h2>
               <p><strong>Año:</strong> {{juego.Year}}</p>
               <p><strong>Género:</strong> {{juego.Genre}}</p>
+              <p><strong>Género:</strong> {{juego.Platform}}</p>
             </div>
         </div>
         {% endfor %}
       </div>
       <button id="load-more">Cargar más</button>
     </main>
-    <script src="/scripts.js"></script>
+    <script>
+      
+const cards = document.querySelectorAll('#games-container .card');
+const blockSize = 5;
+
+document.getElementById('load-more').addEventListener('click', () => {
+  let changed = 0;
+  for (let i = 0; i < cards.length && changed < blockSize; i++) {
+    if (cards[i].id === 'off') {
+      cards[i].id = 'on';
+      changed++;
+    }
+  }
+});
+</script>
 {% endblock %}
