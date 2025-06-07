@@ -14,9 +14,14 @@ Link a casos de uso: https://onedrive.live.com/personal/07dec0e241a74c12/_layout
 
 Link a texto descriptivo del proyecto: https://docs.google.com/document/d/11Qe2bSqGOx7W_UvtJo15sN2sc5ofwtq_bZfuXuOqs0I/edit?pli=1&tab=t.0
 
-Correr servidor: 
+## 🛠️ Correr servidor: 
+
 pip install --user django
+
 pip install --user django_bootstrap5
+
 python manage.py makemigrations
+
 python manage.py migrate
+
 python manage.py runserver
