@@ -1,8 +1,18 @@
 {% extends "base.html" %}
+{% load static %}
 {% block page_content %}
 <main>
       <div id="games-container" class="cards-container">
-        <!-- Aquí se cargarán las cards -->
+        {% for juego in juegos %}
+        <div class="card">
+          <img src= "{% static 'img/tech_diff.png'%}" alt="Portada de {{juego.Name}}" />
+            <div class="card-info">
+              <h2>{{juego.Name}}</h2>
+              <p><strong>Año:</strong> {{juego.Year}}</p>
+              <p><strong>Género:</strong> {{juego.Genre}}</p>
+            </div>
+        </div>
+        {% endfor %}
       </div>
       <button id="load-more">Cargar más</button>
     </main>
