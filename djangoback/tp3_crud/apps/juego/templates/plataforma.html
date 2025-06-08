@@ -3,41 +3,71 @@
   h1 {
     color: aquamarine;
   }
+
+  .platform-container {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .platform-button {
+    border-radius: 20px;
+    color: rgb(232, 70, 70);
+    padding: 10px 20px;
+    margin: 5px;
+    font-weight: bold;
+    border: none;
+    width: 140px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 </style>
 <main>
   <h1>Plataformas</h1>
-  <button type="button">2600</button>
-  <button type="button">3DO</button>
-  <button type="button">3DS</button>
-  <button type="button">DC</button>
-  <button type="button">DS</button>
-  <button type="button">GB</button>
-  <button type="button">GBA</button>
-  <button type="button">GC</button>
-  <button type="button">GEN</button>
-  <button type="button">GG</button>
-  <button type="button">N64</button>
-  <button type="button">NES</button>
-  <button type="button">NG</button>
-  <button type="button">PC</button>
-  <button type="button">PCFX</button>
-  <button type="button">PS</button>
-  <button type="button">PS2</button>
-  <button type="button">PS3</button>
-  <button type="button">PS4</button>
-  <button type="button">PSP</button>
-  <button type="button">PSV</button>
-  <button type="button">SAT</button>
-  <button type="button">SCD</button>
-  <button type="button">SNES</button>
-  <button type="button">TG16</button>
-  <button type="button">WS</button>
-  <button type="button">Wii</button>
-  <button type="button">WiiU</button>
-  <button type="button">X360</button>
-  <button type="button">XB</button>
-  <button type="button">XOne</button>
-
+  <div class="platform-container">
+    <button type="button" class="platform-button">2600</button>
+    <button type="button" class="platform-button">3DO</button>
+    <button type="button" class="platform-button">3DS</button>
+    <button type="button" class="platform-button">DC</button>
+    <button type="button" class="platform-button">DS</button>
+    <button type="button" class="platform-button">PS</button>
+    <button type="button" class="platform-button">PS2</button>
+  </div>
+  <div class="platform-container">
+    <button type="button" class="platform-button">GB</button>
+    <button type="button" class="platform-button">GBA</button>
+    <button type="button" class="platform-button">GC</button>
+    <button type="button" class="platform-button">GEN</button>
+    <button type="button" class="platform-button">GG</button>
+    <button type="button" class="platform-button">PS3</button>
+    <button type="button" class="platform-button">PS4</button>
+  </div>
+  <div class="platform-container">
+    <button type="button" class="platform-button">N64</button>
+    <button type="button" class="platform-button">NES</button>
+    <button type="button" class="platform-button">NG</button>
+    <button type="button" class="platform-button">PC</button>
+    <button type="button" class="platform-button">PCFX</button>
+    <button type="button" class="platform-button">PSP</button>
+    <button type="button" class="platform-button">PSV</button>
+  </div>
+  <div class="platform-container">
+    <button type="button" class="platform-button">SAT</button>
+    <button type="button" class="platform-button">SCD</button>
+    <button type="button" class="platform-button">SNES</button>
+    <button type="button" class="platform-button">TG16</button>
+    <button type="button" class="platform-button">WS</button>
+    <button type="button" class="platform-button">Wii</button>
+    <button type="button" class="platform-button">WiiU</button>
+  </div>
+  <div class="platform-container">
+    <button type="button" class="platform-button">X360</button>
+    <button type="button" class="platform-button">XB</button>
+    <button type="button" class="platform-button">XOne</button>
+  </div>
   <script></script>
   {% endblock %}
 </main>
