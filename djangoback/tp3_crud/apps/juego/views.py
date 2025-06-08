@@ -5,6 +5,7 @@ from django.views.generic import TemplateView
 from django.contrib.auth.forms import UserCreationForm
 from apps.juego.models import Juego
 
+
 class JuegoView(TemplateView):
     name = "home"
     template_name = "home.html"
@@ -14,14 +15,26 @@ class JuegoView(TemplateView):
         context["juegos"] = Juego.objects.all()
         return context
 
+
 class GeneroView(TemplateView):
     name = "genero"
     template_name = "genero.html"
-    
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["juegos"] = Juego.objects.all()
         return context
+
+
+class PlataformaView(TemplateView):
+    name = "plataforma"
+    template_name = "plataforma.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["juegos"] = Juego.objects.all()
+        return context
+
 
 def LoginAuth(request):
     if request.method == "POST":
@@ -37,6 +50,7 @@ def LoginAuth(request):
             messages.error(request, "Usuario o Contraseña incorrectos")
 
     return render(request, "login.html")
+
 
 def register_view(request):
     if request.method == "POST":
