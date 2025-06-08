@@ -7,4 +7,5 @@ urlpatterns = [
     path("register", views.register_view, name="register"),
     path("genero", views.GeneroView.as_view(), name="genero"),
     path("plataforma", views.PlataformaView.as_view(), name="plataforma"),
+    path("decada", views.DecadaView.as_view(), name="plataforma"),
 ]
