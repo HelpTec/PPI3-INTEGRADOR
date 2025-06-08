@@ -13,14 +13,15 @@ class JuegoView(TemplateView):
         context = super().get_context_data(**kwargs)
         context["juegos"] = Juego.objects.all()
         return context
-    
-    def juegos_lista(request):
-        juegos = list(Juego.objects.values('Name', 'Year', 'Genre', 'Platform'))
-        return render(request, 'home.html', {'juegos': juegos})
 
 class GeneroView(TemplateView):
     name = "genero"
     template_name = "genero.html"
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["juegos"] = Juego.objects.all()
+        return context
 
 def LoginAuth(request):
     if request.method == "POST":

@@ -1,43 +1,99 @@
 {% extends "base.html" %} {% block page_content %}
-
+{% load static %}
 <body>
   <div class="container">
     <h1>Géneros</h1>
     <div class="genre-container">
-      <button type="button" class="btn genre-button btn-accion">Acción</button>
-      <button type="button" class="btn genre-button btn-plataforma">
-        Plataforma
-      </button>
-      <button type="button" class="btn genre-button btn-carreras">
-        Carreras
-      </button>
-      <button type="button" class="btn genre-button btn-rpg">RPG</button>
-      <button type="button" class="btn genre-button btn-lucha">Lucha</button>
+      <button type="button" data-genre="Action" class="btn genre-button btn-accion">Acción</button>
+      <button type="button" data-genre="Platform" class="btn genre-button btn-plataforma">Plataforma</button>
+      <button type="button" data-genre="Racing" class="btn genre-button btn-carreras">Carreras</button>
+      <button type="button" data-genre="Role-Playing" class="btn genre-button btn-rpg">RPG</button>
+      <button type="button" data-genre="Fighting" class="btn genre-button btn-lucha">Lucha</button>
     </div>
     <div class="genre-container">
-      <button type="button" class="btn genre-button btn-shooter">
-        Shooter
-      </button>
-      <button type="button" class="btn genre-button btn-estrategia">
-        Estrategia
-      </button>
-      <button type="button" class="btn genre-button btn-simulador">
-        Simulador
-      </button>
-      <button type="button" class="btn genre-button btn-deportes">
-        Deportes
-      </button>
-      <button type="button" class="btn genre-button btn-rompecabezas">
-        Rompecabezas
-      </button>
+      <button type="button" data-genre="Shooter" class="btn genre-button btn-shooter">Shooter</button>
+      <button type="button" data-genre="Strategy" class="btn genre-button btn-estrategia">Estrategia</button>
+      <button type="button" data-genre="Simulation" class="btn genre-button btn-simulador">Simulador</button>
+      <button type="button" data-genre="Sports" class="btn genre-button btn-deportes">Sports</button>
+      <button type="button" data-genre="Puzzle" class="btn genre-button btn-rompecabezas">Rompecabezas</button>
     </div>
     <div class="genre-container">
-      <button type="button" class="btn genre-button btn-aventura">
-        Aventura
-      </button>
-      <button type="button" class="btn genre-button btn-misc">Misc</button>
+      <button type="button" data-genre="Adventure" class="btn genre-button btn-aventura">Aventura</button>
+      <button type="button" data-genre="Misc" class="btn genre-button btn-misc">Misc</button>
     </div>
   </div>
+  <style>
+  #off {
+  display: none;
+ }
+</style>
+<main>
+      <div id="games-container" class="cards-container">
+        {% for juego in juegos %}
+        <div class="card" data-genre="{{ juego.Genre }}"
+        style= "display: none;">
+          <img src= "{% static 'img/tech_diff.png'%}" alt="Portada de {{juego.Name}}" />
+            <div class="card-info">
+              <h2>{{juego.Name}}</h2>
+              <p><strong>Año:</strong> {{juego.Year}}</p>
+              <p><strong>Género:</strong> {{juego.Genre}}</p>
+              <p><strong>Género:</strong> {{juego.Platform}}</p>
+            </div>
+        </div>
+        {% endfor %}
+      </div>
+      <button id="load-more">Cargar más</button>
+    </main>
+    <script>
+
+const genreButtons = document.querySelectorAll('.genre-button'); // <-- importante
+const loadMoreBtn = document.getElementById('load-more'); // <-- importante
+const cards = document.querySelectorAll('#games-container .card');
+const blockSize = 5;
+
+let currentIndex = 0;
+let selectedGenre = null;
+
+  function hideAllCards() {
+    cards.forEach(card => card.style.display = 'none');
+  }
+
+  function showCardsForGenre(genre) {
+    const filteredCards = Array.from(cards).filter(card => card.dataset.genre === genre);
+
+    hideAllCards();
+    currentIndex = 0;
+    
+    for (let i = 0; i < blockSize && i < filteredCards.length; i++) {
+      filteredCards[i].style.display = 'block';
+    }
+
+    currentIndex += blockSize;
+    selectedGenre = genre;
+  }
+
+  function loadMoreCards() {
+    if (!selectedGenre) return;
+
+    const filteredCards = Array.from(cards).filter(card => card.dataset.genre === selectedGenre);
+
+    for (let i = currentIndex; i < currentIndex + blockSize && i < filteredCards.length; i++) {
+      filteredCards[i].style.display = 'block';
+    }
+
+    currentIndex += blockSize;
+  }
+
+  genreButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const genre = e.target.dataset.genre;
+      showCardsForGenre(genre);
+    });
+  });
+
+  loadMoreBtn.addEventListener('click', loadMoreCards);
+</script>
+
   <style>
     body {
       background-color: #1a1a1a;
