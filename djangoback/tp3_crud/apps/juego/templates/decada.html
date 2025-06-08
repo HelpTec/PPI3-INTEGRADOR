@@ -3,9 +3,37 @@
   h1 {
     color: aquamarine;
   }
+  .decada-container {
+    margin-top: 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .decada-button {
+    border-radius: 20px;
+    color: rgb(232, 70, 70);
+    padding: 10px 20px;
+    margin: 5px;
+    font-weight: bold;
+    border: none;
+    width: 140px;
+    height: 50px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 </style>
 <main>
   <h1>Decadas</h1>
+  <div class="decada-container">
+    <button type="button" class="decada-button">1980</button>
+    <button type="button" class="decada-button">1990</button>
+    <button type="button" class="decada-button">2000</button>
+    <button type="button" class="decada-button">2010</button>
+    <button type="button" class="decada-button">2020</button>
+    <button type="button" class="decada-button">Show All</button>
+  </div>
 </main>
 <script></script>
 {% endblock %}
