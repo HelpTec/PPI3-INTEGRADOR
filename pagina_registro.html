@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Crear cuenta</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        background: #100f0f;
+        display: flex;
+        height: 100vh;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .form-container {
+        background: white;
+        padding: 2em;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
+      }
+
+      h2 {
+        text-align: center;
+        margin-bottom: 1em;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.3em;
+        font-weight: bold;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 0.5em;
+        margin-bottom: 1em;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      .message {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 1em;
+      }
+
+      .error {
+        color: red;
+        font-size: 0.9em;
+        margin-bottom: 1em;
+        display: none;
+      }
+
+      button {
+        width: 100%;
+        padding: 0.7em;
+        background-color: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #556cd6;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="form-container">
+      <h2>Crear cuenta</h2>
+      <form id="registerForm">
+        <label for="username">Nombre de usuario</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          required
+          minlength="8"
+          placeholder="Ingresá tu usuario"
+        />
+        <div class="message">
+          <p>
+            * Requerido, maximo 150 caracteres letras, digitos y @/./+/-/_
+            solamente
+          </p>
+        </div>
+
+        <label for="password">Contraseña</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          required
+          placeholder="Ingresá tu contraseña"
+        />
+        <div class="message">
+          <p>
+            Tu contraseña no debe ser demasiado similar a datos de tu
+            informacion personal. Debe contener al menos 8 caracteres. No debe
+            ser una que uses habitualmente. No puede ser enteramente numerica.
+          </p>
+        </div>
+        <label for="confirmPassword">Confirmar contraseña</label>
+        <input
+          type="password"
+          id="confirmPassword"
+          name="confirmPassword"
+          required
+          placeholder="Repetí la contraseña"
+        />
+        <div class="message">
+          <p>Ingresar la misma contraseña que antes, para verificacion.</p>
+        </div>
+        <div class="error" id="errorMsg">Las contraseñas no coinciden.</div>
+
+        <button type="submit">Registrarse</button>
+      </form>
+    </div>
+
+    <script>
+      const form = document.getElementById("registerForm");
+      const password = document.getElementById("password");
+      const confirmPassword = document.getElementById("confirmPassword");
+      const errorMsg = document.getElementById("errorMsg");
+
+      form.addEventListener("submit", function (event) {
+        if (password.value !== confirmPassword.value) {
+          event.preventDefault();
+          errorMsg.style.display = "block";
+        } else {
+          errorMsg.style.display = "none";
+          alert("Formulario enviado correctamente 🎉");
+        }
+      });
+    </script>
+  </body>
+</html>
