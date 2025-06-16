@@ -1,80 +1,156 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  font-family: Arial, sans-serif;
-}
+/* tp3_crud/static/css/styles.css */
 
+/* General default body styles for the entire site. */
 body {
-  background-color: #100f0f;
-  padding: 20px;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #111; /* Default dark background for all pages */
+    color: #e0e0e0; /* Default light text for all pages */
+    margin: 0;
+    padding: 0;
 }
 
-header {
-  text-align: left;
-  margin-bottom: 30px;
+/* Navbar styles to match the dark theme */
+.navbar {
+    background-color: #111 !important; /* Slightly lighter dark for navbar, use !important to ensure it overrides Bootstrap defaults */
+    border-bottom: 1px solid #333;
+    padding: 1rem 0;
 }
 
-header h1 {
-  font-size: 3rem;
-  color: #f5ebeb;
+.navbar-brand {
+    color: #fff !important; /* GameBase green or bright accent color, use !important */
+    font-weight: bold;
+    font-size: 1.8rem;
+    margin-left: 20px;
 }
+
+/* Ensure the text part of the brand inherits brand color */
+.navbar-brand span {
+    color: inherit; /* Inherit color from parent .navbar-brand */
+    margin-left: 10px; /* Space from logo */
+}
+
+.navbar-nav .nav-link {
+    color: #e0e0e0 !important; /* Muted light color, use !important */
+    font-size: 1.1rem;
+    margin-right: 15px;
+    transition: color 0.3s ease;
+}
+
+.navbar-nav .nav-link:hover,
+.navbar-nav .nav-link.active {
+    color: #fff !important; /* Hover and active effect, use !important */
+}
+
+/* General container styling if you want it to be wide across the site */
+.container {
+    max-width: 1300px;
+    padding-left: 20px;
+    padding-right: 20px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Footer styles (assuming you have a footer in base.html) */
+.footer {
+    background-color: #1a1a1a !important;
+    color: #e0e0e0 !important;
+    border-top: 1px solid #333;
+    padding: 20px 0;
+    text-align: center;
+    margin-top: 50px;
+}
+
+/* NEW CSS FOR GAME CARDS */
 
 .cards-container {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 20px;
-  max-width: 1200px;
-  margin: 0 auto 30px;
+    display: grid; /* Use CSS Grid for responsive layout */
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); /* Responsive columns */
+    gap: 30px; /* Space between cards */
+    padding: 50px 20px; /* Padding around the grid */
+    max-width: 1300px; /* Match main container width */
+    margin: 0 auto; /* Center the grid */
+}
+
+.card-link {
+    text-decoration: none; /* Remove underline from links */
+    color: inherit; /* Inherit text color from parent */
 }
 
 .card {
-  background-color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  overflow: hidden;
-  transition: transform 0.2s ease;
+    background-color: #1a1a1a; /* Dark card background */
+    border-radius: 12px; /* Rounded corners */
+    overflow: hidden; /* Ensures image corners are rounded */
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4); /* Subtle shadow */
+    transition: transform 0.2s ease, box-shadow 0.2s ease; /* Smooth hover effect */
+    display: flex; /* Flexbox for content inside card */
+    flex-direction: column; /* Stack image and info vertically */
+    height: 100%; /* Ensure cards in a row have same height */
+    justify-content: space-between; /* Push footer info to bottom if content varies */
 }
 
 .card:hover {
-  transform: translateY(-5px);
+    transform: translateY(-5px); /* Lift effect on hover */
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.6); /* More prominent shadow on hover */
 }
 
 .card img {
-  width: 100%;
-  height: 280px;
-  object-fit: cover;
+    width: 100%;
+    height: 250px; /* Fixed height for consistent image size */
+    object-fit: cover; /* Cover the area, cropping if necessary */
+    border-top-left-radius: 12px; /* Match card radius */
+    border-top-right-radius: 12px; /* Match card radius */
 }
 
 .card-info {
-  padding: 15px;
+    padding: 15px; /* Padding inside the card info area */
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1; /* Allows info section to expand */
 }
 
 .card-info h2 {
-  font-size: 1.25rem;
-  margin-bottom: 8px;
-  color: #333;
+    font-size: 1.4em;
+    color: #fff; /* Green color for game title */
+    margin-bottom: 10px;
+    min-height: 2.8em; /* Ensure consistent height for titles over two lines */
+    line-height: 1.2;
 }
 
 .card-info p {
-  font-size: 0.9rem;
-  color: #555;
-  margin-bottom: 4px;
+    font-size: 0.95em;
+    color: #b0b0b0; /* Muted light text for details */
+    margin-bottom: 5px;
 }
 
+.card-info p strong {
+    color: #e0e0e0; /* Stronger light color for labels */
+}
+
+/* Styling for "off" cards (hidden by JavaScript) */
+#off {
+    display: none; /* Keep this for the "load more" functionality */
+}
+
+/* Styling for "on" cards (visible) - ensures visibility */
+#on {
+    display: flex; /* Override display:none to make it visible and apply flex for content */
+}
+
+/* Load More Button Styling */
 #load-more {
-  display: block;
-  margin: 0 auto;
-  padding: 12px 30px;
-  font-size: 1rem;
-  background-color: #0070f3;
-  color: white;
-  border: none;
-  border-radius: 30px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+    display: block; /* Make it a block element to center */
+    margin: 30px auto 50px auto; /* Center horizontally, add vertical spacing */
+    padding: 12px 25px;
+    background-color: #1DB954; /* Spotify Green */
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
 }
 
 #load-more:hover {
-  background-color: #005bb5;
+    background-color: #1ed760; /* Lighter green on hover */
+    transform: translateY(-2px);
 }

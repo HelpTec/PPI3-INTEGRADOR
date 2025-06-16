@@ -2,107 +2,140 @@
 {% load static %}
 {% block content %}
 <style>
-      body {
-        background-color: #1a1a1a; 
-        color: #f8f9fa; 
-        font-family: Arial, sans-serif; 
-        margin: 0; 
-        min-height: 100vh; 
-        display: flex;
-        flex-direction: column;
-      }
-
-      .header-image-container {
+    /* Ensure html and body take full width and height, and remove default margins */
+    html, body {
+        margin: 0;
+        padding: 0;
         width: 100%;
-        height: 200px; /* Altura de la imagen de fondo */
-        background-image: url("{% static 'img/mario.png' %}"); /* Placeholder para la imagen de fondo superior */
+        height: 100%; /* Ensure body takes full height for proper flex behavior */
+        overflow-x: hidden; /* Prevent horizontal scrollbar if elements slightly overflow */
+    }
+
+    body {
+        background-color: #1a1a1a;
+        color: #f8f9fa;
+        font-family: Arial, sans-serif;
+        display: flex;
+        flex-direction: column; /* Stacks header and main content vertically */
+    }
+
+    .header-image-container {
+        width: 100%;
+        height: 200px; /* This is the height of your top bar image */
+        background-image: url("{% static 'img/mario.png' %}");
         background-size: cover;
         background-position: center;
-        position: relative; 
-      }
+        background-repeat: no-repeat;
+        position: relative;
+        flex-shrink: 0; /* Prevents this from shrinking if other content is tall */
+    }
 
-      .header-text {
+    /* .header-text (if you want text on the image, uncomment this) */
+    /*
+    .header-text {
         position: absolute;
         top: 10px;
         left: 10px;
         color: white;
         font-size: 0.9rem;
         opacity: 0.7;
-      }
+    }
+    */
 
-      .main-content {
-        padding: 40px 20px;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: space-between; 
-        align-items: flex-start; 
-        flex-grow: 1; 
-      }
+    /* New container for the panels below the header image */
+    .content-wrapper {
+        flex-grow: 1; /* Allows this wrapper to take up remaining vertical space */
+        display: flex; /* Arranges left and right panels side-by-side */
+        /* justify-content: space-between;  <--- REMOVE OR CHANGE THIS */
+        justify-content: center; /* <--- ADDED: Centers the entire content (left and right panels) horizontally */
+        align-items: flex-start; /* Aligns them to the top */
+        padding: 40px 20px; /* Padding around the content */
+        gap: 80px; /* <--- ADDED: Space between the left and right panels, adjust as needed */
+    }
 
-      .left-panel {
-        flex: 1; 
-        min-width: 300px; 
-        padding-right: 20px; 
-      }
+    .left-panel {
+        /* We no longer need flex: 1 to make it take available space;
+           instead, we'll just let its content define its width.
+           We might need a fixed width or max-width if it gets too wide. */
+        /* flex: 1; */
+        min-width: 300px; /* Minimum width for the left panel */
+        /* padding-right: 20px; <--- No longer needed with 'gap' on content-wrapper */
+    }
 
-      .right-panel {
-        flex-basis: 350px; 
-        max-width: 400px; 
-        background-color: #2b2b2b; 
+    .right-panel {
+        flex-basis: 350px; /* Preferred width for the form panel */
+        max-width: 400px; /* Maximum width for the form panel */
+        background-color: #2b2b2b;
         padding: 30px;
         border-radius: 8px;
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      }
+    }
 
-      .gamebase-logo {
+    .gamebase-logo {
         display: flex;
         align-items: center;
         margin-bottom: 20px;
-      }
+    }
 
-      .gamebase-logo img {
-        width: 28px; /* Tamaño del icono del logo */
+    .gamebase-logo img {
+        width: 28px;
         height: 28px;
         margin-right: 10px;
-      } 
+    }
 
-      .form-floating label {
-        color: #adb5bd; 
-      }
+    .form-floating label {
+        color: #adb5bd;
+    }
 
-      .form-control-dark {
-        background-color: #3b3b3b;
-        color: #f8f9fa; /* Color del texto dentro de los inputs */
-        border: 1px solid #4a4a4a;
-      }
-
-      .form-control-dark:focus {
+    .form-control-dark {
         background-color: #3b3b3b;
         color: #f8f9fa;
-        border-color: #0d6efd; /* Color de borde al enfocar */
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25); /* Sombra al enfocar */
-      }
+        border: 1px solid #4a4a4a;
+    }
 
-      /* Ajuste para los iconos dentro de los inputs */
-      .input-group-text-dark {
+    .form-control-dark:focus {
+        background-color: #3b3b3b;
+        color: #f8f9fa;
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
+
+    .input-group-text-dark {
         background-color: #3b3b3b;
         border: 1px solid #4a4a4a;
-        color: #adb5bd; /* Color del icono */
-      }
+        color: #adb5bd;
+    }
 
-      .btn-primary-custom {
-        background-color: #007bff; /* Color azul de login */
+    .btn-primary-custom {
+        background-color: #007bff;
         border-color: #007bff;
         width: 100%;
-        margin-bottom: 15px; /* Espacio entre botones */
-      }
+        margin-bottom: 15px;
+    }
 
-      .btn-primary-custom:hover {
+    .btn-primary-custom:hover {
         background-color: #0056b3;
         border-color: #0056b3;
-      }
+    }
 
-      .btn-google {
+    .btn-secondary-custom { /* Changed from btn-google as per screenshot */
+        background-color: #6c757d; /* A more neutral color */
+        border-color: #6c757d;
+        color: #fff;
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
+
+    .btn-secondary-custom:hover {
+        background-color: #5a6268;
+        border-color: #545b62;
+    }
+
+    /* Styles for the "Continuar con Google" button */
+    .btn-google {
         background-color: #fff;
         color: #212529;
         border: 1px solid #ced4da;
@@ -111,48 +144,74 @@
         align-items: center;
         justify-content: center;
         gap: 10px; /* Espacio entre icono y texto */
-      }
+        margin-bottom: 15px; /* Added spacing */
+    }
 
-      .btn-google:hover {
+    .btn-google:hover {
         background-color: #e2e6ea;
         border-color: #dae0e5;
-      }
+    }
 
-      .btn-google img {
-        height: 20px; /* Tamaño del icono de Google */
-      }
+    .btn-google img {
+        height: 20px;
+    }
 
-      /* Media queries para responsividad */
-      @media (max-width: 768px) {
-        .main-content {
-          flex-direction: column; /* Apila los paneles en pantallas pequeñas */
-          align-items: center; /* Centra los paneles */
+    /* Divider text "O" */
+    .divider-text {
+        text-align: center;
+        margin: 15px 0;
+        color: #adb5bd;
+        font-size: 0.9rem;
+        position: relative;
+    }
+
+    .divider-text::before,
+    .divider-text::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        width: 40%;
+        height: 1px;
+        background: #4a4a4a;
+    }
+
+    .divider-text::before {
+        left: 0;
+    }
+
+    .divider-text::after {
+        right: 0;
+    }
+
+
+    /* Media queries para responsividad */
+    @media (max-width: 768px) {
+        .content-wrapper {
+            flex-direction: column; /* Apila los paneles en pantallas pequeñas */
+            align-items: center; /* Centra los paneles */
+            padding: 20px; /* Adjust padding for smaller screens */
+            gap: 0; /* Remove gap on mobile when stacked */
         }
         .left-panel,
         .right-panel {
-          width: 90%; /* Ocupa más ancho en móvil */
-          padding: 0;
+            width: 100%; /* Ocupa más ancho en móvil */
+            padding: 0; /* Remove padding */
+            max-width: unset; /* Remove max-width on mobile for better fit */
         }
         .left-panel {
-          margin-bottom: 30px; /* Espacio entre los paneles apilados */
-          padding-right: 0;
-          text-align: center; /* Centra el logo y el texto en móvil */
+            margin-bottom: 30px; /* Espacio entre los paneles apilados */
+            padding-right: 0;
+            text-align: center; /* Centra el logo y el texto en móvil */
         }
-        .right-panel {
-          min-width: unset; /* Quita el min-width para mobile */
-        }
-      }
-    
+    }
 </style>
     <div class="header-image-container">
-     
-    </div>
+        </div>
 
-    <div class="container-fluid main-content">
+    <div class="content-wrapper">
       <div class="left-panel">
         <div class="gamebase-logo">
           <img src="{% static 'img/logoGB.png' %}" alt="GameBase Logo" />
-          <h2>GameBase</h2>
         </div>
         <h2>Ingresar</h2>
       </div>
@@ -164,13 +223,13 @@
           <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
         {{ message }}
           </li>
-         {% endfor %}
-         </ul>
+          {% endfor %}
+          </ul>
         {% endif %}
         <form method="post">
           {% csrf_token %}
           <div class="mb-3">
-            <label for="inputEmail" class="form-label visually-hidden"
+            <label for="username" class="form-label visually-hidden"
               >Correo electrónico</label
             >
             <div class="input-group">
@@ -188,7 +247,7 @@
             </div>
           </div>
           <div class="mb-3">
-            <label for="inputPassword" class="form-label visually-hidden"
+            <label for="password" class="form-label visually-hidden"
               >Contraseña</label
             >
             <div class="input-group">
@@ -206,8 +265,13 @@
             </div>
           </div>
           <button type="submit" class="btn btn-primary-custom">Login</button>
+
+
+
+          <div class="divider-text">O</div>
+
           <a href="/register">
-            <button type="button" class="btn btn-google">
+            <button type="button" class="btn btn-secondary-custom">
               Registrarse!
             </button>
           </a>

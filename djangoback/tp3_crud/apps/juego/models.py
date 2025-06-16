@@ -12,4 +12,4 @@ class Juego(models.Model):
     JP_Sales = models.FloatField(max_length=100, null=True, blank= True)
     Other_Sales = models.FloatField(max_length=100, null=True, blank= True)
     Global_Sales = models.FloatField(max_length=100, null=True, blank= True)
-    
+    #Image_URL = models.URLField(max_length=500, null=True, blank=True) 

@@ -1,6 +1,6 @@
 from django.contrib.auth import authenticate, login
 from django.contrib import messages
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib.auth.forms import UserCreationForm
 from apps.juego.models import Juego
@@ -15,6 +15,23 @@ class JuegoView(TemplateView):
         context["juegos"] = Juego.objects.all()
         return context
 
+
+def detalle_juego(request, juego_id):
+    juego = get_object_or_404(Juego, id=juego_id)
+
+
+    sales_data = {
+        'NA_Sales': juego.NA_Sales if juego.NA_Sales is not None else 0,
+        'EU_Sales': juego.EU_Sales if juego.EU_Sales is not None else 0,
+        'JP_Sales': juego.JP_Sales if juego.JP_Sales is not None else 0,
+        'Other_Sales': juego.Other_Sales if juego.Other_Sales is not None else 0,
+    }
+
+    context = {
+        'juego': juego,
+        'sales_data_json': sales_data 
+    }
+    return render(request, 'juego.html', context)
 
 class GeneroView(TemplateView):
     name = "genero"
