@@ -12,7 +12,6 @@
         {% for juego in juegos %}
         <div class="card" id="{% if forloop.counter0 < 5 %}on{% else %}off{% endif %}">
         <a href="{% url 'detalle_juego' juego_id=juego.id %}" class="card-link">
-        
           <img src= "{% static 'img/tech_diff.png'%}" alt="Portada de {{juego.Name}}" />
             <div class="card-info">
               <h2>{{juego.Name}}</h2>

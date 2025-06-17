@@ -116,7 +116,7 @@ def LoginAuth(request):
 
         if user is not None:
             login(request, user)
-            return redirect("juego")
+            return redirect("home")
         else:
             messages.error(request, "Usuario o Contraseña incorrectos")
 

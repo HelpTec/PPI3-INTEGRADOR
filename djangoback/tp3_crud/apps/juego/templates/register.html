@@ -1,19 +1,95 @@
 {% extends "base.html" %}
 {% load static %}
 {% block page_content %}
-<h2>Crear cuenta</h2>
+<style>
+.form-container {
+        background: white;
+        padding: 2em;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        width: 300px;
+      }
 
-<form method="post">
+      h2 {
+        text-align: center;
+        margin-bottom: 1em;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 0.3em;
+        font-weight: bold;
+      }
+
+      input[type="text"],
+      input[type="password"] {
+        width: 100%;
+        padding: 0.5em;
+        margin-bottom: 1em;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+      }
+
+      .message {
+        font-size: 0.9em;
+        color: #666;
+        margin-bottom: 1em;
+      }
+
+      .error {
+        color: red;
+        font-size: 0.9em;
+        margin-bottom: 1em;
+        display: none;
+      }
+
+      button {
+        width: 100%;
+        padding: 0.7em;
+        background-color: #667eea;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      button:hover {
+        background-color: #556cd6;
+      }
+    </style>
+<div class="form-container">
+  <h2>Crear cuenta</h2>
+  <form method="post" id="registerForm" novalidate>
     {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit">Registrarse</button>
-</form>
 
-{% if messages %}
-  <ul class="messages">
-    {% for message in messages %}
-      <li class="{{ message.tags }}">{{ message }}</li>
-    {% endfor %}
-  </ul>
-{% endif %}
+    <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+    {{ form.username }}
+    <div class="message">
+      <p>* Requerido, máximo 150 caracteres. Letras, dígitos y @/./+/-/_ solamente.</p>
+      {{ form.username.errors }}
+    </div>
+
+    <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+    {{ form.password1 }}
+    <div class="message">
+      <p>
+        Tu contraseña no debe ser demasiado similar a tu información personal.
+        Debe contener al menos 8 caracteres, no debe ser común ni enteramente numérica.
+      </p>
+      {{ form.password1.errors }}
+    </div>
+
+    <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+    {{ form.password2 }}
+    <div class="message">
+      <p>Ingresar la misma contraseña que antes, para verificación.</p>
+      {{ form.password2.errors }}
+    </div>
+
+    <div class="error" id="errorMsg" style="display: none;">Las contraseñas no coinciden.</div>
+
+    <button type="submit">Registrarse</button>
+  </form>
+</div>
 {% endblock %}
