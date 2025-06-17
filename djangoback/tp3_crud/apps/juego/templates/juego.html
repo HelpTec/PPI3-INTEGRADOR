@@ -5,9 +5,7 @@
 
 {% block extra_head %} {# This content goes into the <head> section of index.html #}
     <style>
-        /* All CSS for this page is handled here */
 
-        /* General Body Styling (Specific to this page, overriding global styles from styles.css) */
         body { 
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #121212; /* Dark background for this page */
@@ -17,8 +15,6 @@
             padding: 0;
         }
 
-        /* Adjust Bootstrap container on this page for full width feel, or remove if you want constrained */
-        /* This will apply to the main content container if it uses the Bootstrap 'container' class */
         .container { 
             max-width: 1300px; /* Wider container for content */
             padding-left: 20px;
@@ -167,11 +163,17 @@
 {% endblock %}
 
 {% block page_content %} {# This is the content block specific to juego.html #}
+
 <main class="main-content">
     <section class="game-banner">
-        <div class="genre-tag">{{ juego.Genre|default:"N/A" }}</div> {# Genre tag #}
+        <div class="genre-tag">{{ juego.Genre|default:"N/A" }}</div>
         <div class="game-banner-image">
-            <img src="{% static 'img/default_game_banner.jpg' %}" alt="Portada de {{ juego.Name }}" class="game-banner-img">
+        {% if juego.Image_URL %}
+            <img src="{{ juego.Image_URL }}" alt="Cover of {{ juego.Name }}" class="game-cover">
+        {% else %}
+            {# Fallback to a default image if no API image is found or available #}
+            <img src="{% static 'img/tech_diff.png' %}" alt="Default game cover" class="game-cover default">
+        {% endif %}
         </div>
         <div class="game-banner-details">
             <h1>{{ juego.Name }}</h1>
@@ -191,16 +193,18 @@
     </section>
 </main>
 
+{# ... (rest of your HTML content, ending with </main>) ... #}
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-{# Use json_script to safely pass data from Django context to JavaScript #}
-{{ sales_data_json|json_script:"sales-data" }} 
+<script>
+    const salesData = JSON.parse('{{ sales_data_json|escapejs }}');
+
+    console.log("Sales data directly embedded (type:", typeof salesData, "):", salesData);
+</script>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Retrieve the data safely from the script tag
-        const salesDataElement = document.getElementById('sales-data');
-        const salesData = JSON.parse(salesDataElement.textContent);
 
         const labels = ['Norte América', 'Europa', 'Japón', 'Otros'];
         const data = [
@@ -210,46 +214,48 @@
             salesData.Other_Sales
         ];
 
+        console.log("Chart Data Array (after fix):", data);
+
         const ctx = document.getElementById('salesChart').getContext('2d');
         new Chart(ctx, {
-            type: 'pie', 
+            type: 'pie',
             data: {
                 labels: labels,
                 datasets: [{
                     label: 'Ventas en Millones',
                     data: data,
                     backgroundColor: [
-                        'rgba(29, 185, 84, 0.7)',  // Spotify Green for NA
-                        'rgba(30, 215, 96, 0.7)',  // Lighter Green for EU
-                        'rgba(255, 128, 0, 0.7)',  // Orange for JP
-                        'rgba(150, 150, 150, 0.7)' // Grey for Other
+                        'rgba(29, 185, 84, 0.7)',
+                        'rgba(30, 215, 96, 0.7)',
+                        'rgba(255, 128, 0, 0.7)',
+                        'rgba(150, 150, 150, 0.7)'
                     ],
-                    borderColor: '#121212', /* Dark border to contrast with slices */
+                    borderColor: '#121212',
                     borderWidth: 2
                 }]
             },
             options: {
                 responsive: true,
-                maintainAspectRatio: false, 
+                maintainAspectRatio: false,
                 plugins: {
                     title: {
                         display: true,
                         text: 'Distribución de Ventas por Región',
-                        color: '#e0e0e0', /* Title color */
+                        color: '#e0e0e0',
                         font: {
                             size: 18
                         }
                     },
                     legend: {
                         display: true,
-                        position: 'right', 
+                        position: 'right',
                         labels: {
-                            color: '#e0e0e0', /* Legend text color */
+                            color: '#e0e0e0',
                             font: {
                                 size: 14
                             },
-                            boxWidth: 20, 
-                            padding: 15 
+                            boxWidth: 20,
+                            padding: 15
                         }
                     },
                     tooltip: {
