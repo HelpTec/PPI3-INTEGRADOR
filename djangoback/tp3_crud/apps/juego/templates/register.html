@@ -1,95 +1,149 @@
 {% extends "base.html" %}
 {% load static %}
-{% block page_content %}
+
+{% block title %}Registrarse{% endblock %} {# Added a title block for clarity #}
+
+{% block extra_head %} {# Added extra_head block for page-specific styles #}
 <style>
-.form-container {
-        background: white;
-        padding: 2em;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        width: 300px;
-      }
+    body { /* If you want this line-height specifically for the register page */
+        line-height: 1.6;
+    }
 
-      h2 {
+    /* Styles for the form container */
+    .form-container {
+        background-color: #1a1a1a; /* Changed from white to dark background */
+        padding: 2.5em; /* Slightly more padding */
+        border-radius: 15px; /* Rounded corners */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Consistent shadow */
+        width: 100%; /* Make it responsive */
+        max-width: 400px; /* Max width to keep it from being too wide */
+        margin: 50px auto; /* Center horizontally with top/bottom margin */
+        color: #e0e0e0; /* Light text color for labels and general text */
+    }
+
+    h2 {
         text-align: center;
-        margin-bottom: 1em;
-      }
+        margin-bottom: 1.5em; /* More space below heading */
+        color: #ffffff; /* White color for the heading */
+        font-size: 2em;
+    }
 
-      label {
+    label {
         display: block;
-        margin-bottom: 0.3em;
+        margin-bottom: 0.5em; /* More space below label */
         font-weight: bold;
-      }
+        color: #ffffff; /* White color for labels */
+    }
 
-      input[type="text"],
-      input[type="password"] {
+    input[type="text"],
+    input[type="password"] {
         width: 100%;
-        padding: 0.5em;
-        margin-bottom: 1em;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-      }
+        padding: 0.7em; /* More padding for inputs */
+        margin-bottom: 1.5em; /* More space below inputs */
+        border: 1px solid #555; /* Darker border for inputs */
+        border-radius: 8px; /* Rounded input fields */
+        background-color: #282828; /* Dark background for inputs */
+        color: #e0e0e0; /* Light text for input values */
+    }
 
-      .message {
-        font-size: 0.9em;
-        color: #666;
-        margin-bottom: 1em;
-      }
+    /* Placeholder text style */
+    input[type="text"]::placeholder,
+    input[type="password"]::placeholder {
+        color: #999;
+    }
 
-      .error {
-        color: red;
-        font-size: 0.9em;
-        margin-bottom: 1em;
-        display: none;
-      }
+    .message {
+        font-size: 0.95em; /* Slightly larger font */
+        color: #b0b0b0; /* Muted light color */
+        margin-bottom: 1.5em; /* Consistent spacing */
+    }
 
-      button {
+    .error {
+        color: #ff6347; /* Tomato red for errors */
+        font-size: 0.95em;
+        margin-bottom: 1.5em;
+        display: none; /* Keep display none as it's controlled by JS */
+    }
+
+    button {
         width: 100%;
-        padding: 0.7em;
-        background-color: #667eea;
+        padding: 0.8em; /* More padding for button */
+        background-color: #1DB954; /* Spotify Green for primary button */
         color: white;
         border: none;
-        border-radius: 5px;
+        border-radius: 8px; /* Rounded button */
         font-weight: bold;
         cursor: pointer;
-      }
+        font-size: 1.1em; /* Larger button text */
+        transition: background-color 0.3s ease, transform 0.2s ease; /* Smooth hover */
+    }
 
-      button:hover {
-        background-color: #556cd6;
-      }
-    </style>
-<div class="form-container">
-  <h2>Crear cuenta</h2>
-  <form method="post" id="registerForm" novalidate>
-    {% csrf_token %}
+    button:hover {
+        background-color: #1ed760; /* Lighter green on hover */
+        transform: translateY(-2px); /* Slight lift effect */
+    }
 
-    <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
-    {{ form.username }}
-    <div class="message">
-      <p>* Requerido, máximo 150 caracteres. Letras, dígitos y @/./+/-/_ solamente.</p>
-      {{ form.username.errors }}
+    /* Responsive adjustments */
+    @media (max-width: 576px) {
+        .form-container {
+            margin: 20px auto; /* Reduce margin on smaller screens */
+            padding: 1.5em;
+            border-radius: 10px;
+        }
+        h2 {
+            font-size: 1.8em;
+        }
+    }
+</style>
+{% endblock extra_head %}
+
+{% block page_content %}
+<main> {# Wrap your form in a main tag if it's the primary content of the page #}
+    <div class="form-container">
+        <h2>Crear cuenta</h2>
+        <form method="post" id="registerForm" novalidate>
+            {% csrf_token %}
+
+            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            {{ form.username }}
+            <div class="message">
+                <p>* Requerido, máximo 150 caracteres. Letras, dígitos y @/./+/-/_ solamente.</p>
+                {% if form.username.errors %}
+                    <div class="error" style="display: block;">{# Show error messages if present #}
+                        {{ form.username.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+            {{ form.password1 }}
+            <div class="message">
+                <p>
+                    Tu contraseña no debe ser demasiado similar a tu información personal.
+                    Debe contener al menos 8 caracteres, no debe ser común ni enteramente numérica.
+                </p>
+                {% if form.password1.errors %}
+                    <div class="error" style="display: block;">
+                        {{ form.password1.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+            {{ form.password2 }}
+            <div class="message">
+                <p>Ingresar la misma contraseña que antes, para verificación.</p>
+                {% if form.password2.errors %}
+                    <div class="error" style="display: block;">
+                        {{ form.password2.errors }}
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="error" id="errorMsg" style="display: none;">Las contraseñas no coinciden.</div>
+
+            <button type="submit">Registrarse</button>
+        </form>
     </div>
-
-    <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
-    {{ form.password1 }}
-    <div class="message">
-      <p>
-        Tu contraseña no debe ser demasiado similar a tu información personal.
-        Debe contener al menos 8 caracteres, no debe ser común ni enteramente numérica.
-      </p>
-      {{ form.password1.errors }}
-    </div>
-
-    <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
-    {{ form.password2 }}
-    <div class="message">
-      <p>Ingresar la misma contraseña que antes, para verificación.</p>
-      {{ form.password2.errors }}
-    </div>
-
-    <div class="error" id="errorMsg" style="display: none;">Las contraseñas no coinciden.</div>
-
-    <button type="submit">Registrarse</button>
-  </form>
-</div>
-{% endblock %}
+</main>
+{% endblock page_content %}

@@ -5,52 +5,43 @@
 
 {% block extra_head %} {# This content goes into the <head> section of index.html #}
     <style>
+        /* All CSS for this page is handled here */
 
+        /* General Body Styling (from styles.css, keeping only overrides if necessary) */
         body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #121212; /* Dark background for this page */
-            color: #e0e0e0; /* Light text color for this page */
-            line-height: 1.6;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container { 
-            max-width: 1300px; /* Wider container for content */
-            padding-left: 20px;
-            padding-right: 20px;
+            line-height: 1.6; /* Keeping this specific override if desired for this page only */
         }
 
         /* Specific container for the main content area of this page */
+        /* .container class should be handled by styles.css and Bootstrap */
         .main-content {
-            padding: 0px; 
+            padding: 20px; /* Added general padding for all sides */
             max-width: 1200px; /* Aligns with the overall content width */
             margin: 0 auto; /* Centers the content */
         }
 
+        /* Updated Game Banner Styles for specific color and border-radius */
         .game-banner {
-            display: flex;
-            flex-wrap: wrap; /* Allows wrapping on smaller screens */
-            gap: 20px; /* Space between image and details */
+            /* Removed display:flex, flex-wrap, gap as Bootstrap's .row will handle it */
             margin-bottom: 30px;
-            align-items: center; /* Vertically align items in the banner */
-            background-color: #1a1a1a; /* Dark card background */
+            /* align-items: center; handled by align-items-center on .row */
+            background-color: #1E1E1E; /* Updated: Dark background for this container */
             padding: 30px; /* More padding for card feel */
-            border-radius: 12px; /* More rounded corners */
+            border-radius: 20px; /* Updated: More rounded corners */
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Stronger shadow for depth */
             overflow: hidden; /* Ensure rounded corners clip content */
             position: relative; /* For genre tag positioning */
         }
 
         .game-banner-image {
-            flex: 1; /* Takes up available space */
-            min-width: 350px; /* Minimum width before wrapping */
+            /* Removed flex properties, min-width, as Bootstrap .col will handle width */
             max-height: 400px; /* Max height for the image container */
             overflow: hidden; /* Clip image if it overflows */
             border-radius: 8px; /* Rounded corners for image */
         }
 
-        .game-banner-img {
+        /* Corrected: This now matches the class applied in HTML */
+        .game-cover {
             width: 100%;
             height: 100%; /* Make image fill container */
             object-fit: cover; /* Cover the area, crop if needed */
@@ -58,8 +49,7 @@
         }
 
         .game-banner-details {
-            flex: 2; /* Takes up more space than the image */
-            min-width: 400px; /* Minimum width before wrapping */
+            /* Removed flex properties, min-width, as Bootstrap .col will handle width */
             padding: 20px;
             color: #e0e0e0; /* Light text for details */
         }
@@ -93,6 +83,7 @@
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            z-index: 10; /* Ensure it's above other elements */
         }
 
         .sales-info {
@@ -120,40 +111,29 @@
 
         /* Chart.js specific styling for text */
         canvas {
-            background-color: #282828; /* Dark background for the chart area */
+            background-color: #1a1a1a; /* Dark background for the chart area */
             border-radius: 8px;
             padding: 10px;
         }
 
-        /* Responsive adjustments */
-        @media (max-width: 992px) { /* Adjust breakpoint for larger screens */
-            .game-banner {
-                flex-direction: column; /* Stack items vertically */
-                align-items: flex-start; /* Align content to the left when stacked */
-            }
-            .game-banner-image {
-                min-width: unset; /* Remove min-width to allow full width */
-                width: 100%; /* Make image take full width */
-                max-height: 300px; /* Adjust image height for smaller screens */
-            }
-            .game-banner-details {
-                min-width: unset; /* Remove min-width */
-                width: 100%; /* Make details take full width */
-            }
-            .genre-tag {
-                position: static; /* Remove absolute positioning on small screens */
-                margin-bottom: 15px; /* Add margin when static */
-                display: inline-block; /* Make it fit content */
-            }
+        /* Responsive adjustments for game banner are now mostly handled by Bootstrap .col classes.
+           The media query below only adjusts chart size. */
+        @media (max-width: 992px) { 
             .chart-container {
                 max-width: 100%; /* Allow chart to take full width of its container */
                 height: 300px; /* Reduce chart height on smaller screens */
+            }
+            .game-banner-details h1 { /* Smaller title on smaller screens */
+                font-size: 2.5em; 
+            }
+            .sales-info h2 {
+                font-size: 2em;
             }
         }
 
         @media (max-width: 576px) {
             .game-banner-details h1 {
-                font-size: 2em; /* Smaller title on very small screens */
+                font-size: 2em; /* Even smaller title on very small screens */
             }
             .sales-info h2 {
                 font-size: 1.8em;
@@ -163,25 +143,31 @@
 {% endblock %}
 
 {% block page_content %} {# This is the content block specific to juego.html #}
-
 <main class="main-content">
     <section class="game-banner">
         <div class="genre-tag">{{ juego.Genre|default:"N/A" }}</div>
-        <div class="game-banner-image">
-        {% if juego.Image_URL %}
-            <img src="{{ juego.Image_URL }}" alt="Cover of {{ juego.Name }}" class="game-cover">
-        {% else %}
-            {# Fallback to a default image if no API image is found or available #}
-            <img src="{% static 'img/tech_diff.png' %}" alt="Default game cover" class="game-cover default">
-        {% endif %}
-        </div>
-        <div class="game-banner-details">
-            <h1>{{ juego.Name }}</h1>
-            <p><strong>Plataforma:</strong> {{ juego.Platform|default:"N/A" }}</p>
-            <p><strong>Año de Lanzamiento:</strong> {{ juego.Year|default:"N/A" }}</p>
-            <p><strong>Editor:</strong> {{ juego.Publisher|default:"N/A" }}</p>
-            <p><strong>Puntuación de Usuarios:</strong> {{ juego.User_Score|default:"N/A" }} ({{ juego.User_Count|default:"0" }} reviews)</p>
-            <p><strong>Puntuación de Críticos:</strong> {{ juego.Critic_Score|default:"N/A" }} ({{ juego.Critic_Count|default:"0" }} reviews)</p>
+        
+        {# Bootstrap row to contain image and details side-by-side #}
+        <div class="row g-4 align-items-center justify-content-center w-100 mx-0"> {# w-100 and mx-0 to ensure row takes full width of banner and no extra margin #}
+            {# Image Column #}
+            <div class="col-12 col-md-4 col-lg-3 game-banner-image"> {# Stacks on mobile, 4 columns on md, 3 on lg #}
+                {% if juego.Image_URL %}
+                    <img src="{{ juego.Image_URL }}" alt="Cover of {{ juego.Name }}" class="img-fluid rounded game-cover"> {# img-fluid makes image responsive #}
+                {% else %}
+                    {# Fallback to a default image if no API image is found or available #}
+                    <img src="{% static 'img/tech_diff.png' %}" alt="Default game cover" class="img-fluid rounded game-cover default">
+                {% endif %}
+            </div>
+            
+            {# Details Column #}
+            <div class="col-12 col-md-8 col-lg-9 game-banner-details"> {# Stacks on mobile, 8 columns on md, 9 on lg (remaining space) #}
+                <h1>{{ juego.Name }}</h1>
+                <p><strong>Plataforma:</strong> {{ juego.Platform|default:"N/A" }}</p>
+                <p><strong>Año de Lanzamiento:</strong> {{ juego.Year|default:"N/A" }}</p>
+                <p><strong>Editor:</strong> {{ juego.Publisher|default:"N/A" }}</p>
+                <p><strong>Puntuación de Usuarios:</strong> {{ juego.User_Score|default:"N/A" }} ({{ juego.User_Count|default:"0" }} reviews)</p>
+                <p><strong>Puntuación de Críticos:</strong> {{ juego.Critic_Score|default:"N/A" }} ({{ juego.Critic_Count|default:"0" }} reviews)</p>
+            </div>
         </div>
     </section>
 
@@ -193,18 +179,14 @@
     </section>
 </main>
 
-{# ... (rest of your HTML content, ending with </main>) ... #}
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
     const salesData = JSON.parse('{{ sales_data_json|escapejs }}');
-
-    console.log("Sales data directly embedded (type:", typeof salesData, "):", salesData);
 </script>
-
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        console.log("Sales data inside DOMContentLoaded:", salesData);
 
         const labels = ['Norte América', 'Europa', 'Japón', 'Otros'];
         const data = [

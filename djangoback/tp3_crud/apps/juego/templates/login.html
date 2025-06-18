@@ -11,38 +11,46 @@
         overflow-x: hidden; /* Prevent horizontal scrollbar if elements slightly overflow */
     }
 
-    body {
-        background-color: #1a1a1a;
-        color: #f8f9fa;
-        font-family: Arial, sans-serif;
-        display: flex;
-        flex-direction: column; /* Stacks header and main content vertically */
+    html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%; /* Ensure body takes full height for proper flex behavior */
+        overflow-x: hidden; /* Prevent horizontal scrollbar if elements slightly overflow */
+        background-color: #111; /* Changed to #111 for the fade effect */
     }
 
     .header-image-container {
         width: 100%;
-        height: 200px; /* This is the height of your top bar image */
+        height: 250px; /* Increased height slightly for more noticeable fade area */
         background-image: url("{% static 'img/mario.png' %}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         position: relative;
         flex-shrink: 0; /* Prevents this from shrinking if other content is tall */
+
+        /* --- Image Fade Out Effect --- */
+        /* This creates a gradient overlay on top of the image */
+        display: flex; /* Use flex to align content (if any) inside this container */
+        align-items: flex-end; /* Align to the bottom for fade from bottom */
+        justify-content: center; /* Center horizontally if content inside */
     }
 
-    /* .header-text (if you want text on the image, uncomment this) */
-    /*
-    .header-text {
+    .header-image-container::after {
+        content: '';
         position: absolute;
-        top: 10px;
-        left: 10px;
-        color: white;
-        font-size: 0.9rem;
-        opacity: 0.7;
+        bottom: 0; /* Start gradient from the bottom */
+        left: 0;
+        width: 100%;
+        height: 100%; /* Cover the entire image height */
+        /* Gradient from transparent (at 0% of its own height) to #111 (at 100% of its own height) */
+        /* rgba(17,17,17,1) is the RGBA equivalent of #111 */
+        background: linear-gradient(to bottom, rgba(17,17,17,0) 0%, rgba(17,17,17,0) 70%, rgba(17,17,17,1) 100%); 
+        pointer-events: none; /* Allows clicks to pass through the gradient */
     }
-    */
 
-    /* New container for the panels below the header image */
+
     .content-wrapper {
         flex-grow: 1; /* Allows this wrapper to take up remaining vertical space */
         display: flex; /* Arranges left and right panels side-by-side */
@@ -63,12 +71,14 @@
     }
 
     .right-panel {
-        flex-basis: 350px; /* Preferred width for the form panel */
-        max-width: 400px; /* Maximum width for the form panel */
-        background-color: #2b2b2b;
-        padding: 30px;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        background-color: #1a1a1a; /* Changed from white to dark background */
+        padding: 2.5em; /* Slightly more padding */
+        border-radius: 15px; /* Rounded corners */
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Consistent shadow */
+        width: 100%; /* Make it responsive */
+        max-width: 400px; /* Max width to keep it from being too wide */
+        margin: 50px auto; /* Center horizontally with top/bottom margin */
+        color: #e0e0e0; /* Light text color for labels and general text */
     }
 
     .gamebase-logo {
@@ -78,8 +88,8 @@
     }
 
     .gamebase-logo img {
-        width: 28px;
-        height: 28px;
+        width: 200px;
+        height: 60px;
         margin-right: 10px;
     }
 
@@ -134,27 +144,7 @@
         border-color: #545b62;
     }
 
-    /* Styles for the "Continuar con Google" button */
-    .btn-google {
-        background-color: #fff;
-        color: #212529;
-        border: 1px solid #ced4da;
-        width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px; /* Espacio entre icono y texto */
-        margin-bottom: 15px; /* Added spacing */
-    }
 
-    .btn-google:hover {
-        background-color: #e2e6ea;
-        border-color: #dae0e5;
-    }
-
-    .btn-google img {
-        height: 20px;
-    }
 
     /* Divider text "O" */
     .divider-text {
