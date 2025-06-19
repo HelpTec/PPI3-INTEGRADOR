@@ -106,7 +106,7 @@ class GeneroView(TemplateView):
         #aca recibimos el genero
         genero = self.request.GET.get("genero")
         #creo una lista vacia
-        juegos_qs = ()
+        juegos_qs = Juego.objects.none()
         #llenamos la lista con juegos del genero
         if genero:
             juegos_qs = Juego.objects.filter(Genre__iexact=genero)
@@ -136,7 +136,7 @@ class PlataformaView(TemplateView):
         #aca recibimos la plataforma
         plataforma = self.request.GET.get("plataforma")
         #creo una lista vacia
-        juegos_qs = ()
+        juegos_qs = Juego.objects.none()
         #llenamos la lista con juegos de la plataforma
         if plataforma:
             juegos_qs = Juego.objects.filter(Platform__iexact=plataforma)
@@ -163,7 +163,37 @@ class DecadaView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["juegos"] = Juego.objects.all()
+        #aca recibimos la decada
+        decada_str = self.request.GET.get("decada")
+        #lista vacia y variable vacia
+        juegos_qs = Juego.objects.all()
+        decada_actual = None
+        #llenamos la lista con juegos de la plataforma
+        if decada_str:
+            try:
+                decada = int(decada_str)
+                print(decada)
+                juegos_qs = juegos_qs.filter(Year__gte=decada, Year__lt=decada + 10)
+                decada_actual = decada
+            except ValueError:
+                pass
+        else:
+            juegos_qs = ()
+            
+        paginator = Paginator(juegos_qs, 5)
+        #repito el proceso de la pagina general y listo
+        page_number = self.request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        for juego in page_obj.object_list:
+            api_data = get_game_data_by_name(juego.Name)
+            if api_data:
+                juego.Image_URL = api_data.get("Image_URL")
+                try:
+                    juego.save()
+                except Exception as e:
+                    print(f"Error guardando {juego.Name}: {e}")
+        context["page_obj"] = page_obj
+        context["decada_actual"] = decada_actual
         return context
 
 
