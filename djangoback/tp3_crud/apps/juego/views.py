@@ -4,6 +4,7 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView
 from django.contrib.auth.forms import UserCreationForm
 from apps.juego.models import Juego
+from django.core.paginator import Paginator
 from .igdb_api import get_game_data_by_name
 import json 
 
@@ -13,7 +14,26 @@ class JuegoView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["juegos"] = Juego.objects.all()
+
+        #creo la lista para el paginador
+        juegos_qs = Juego.objects.all()
+        #cuantos juegos por lista se generan y el argumento del paginador
+        paginator = Paginator(juegos_qs, 5)
+        #esto extrae en que pagina estamos para el indice, tambien guarda los 5 juegos
+        page_number = self.request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        
+        #la funcion que agrega las imagenes de la api
+        for juego in page_obj.object_list:
+            api_data = get_game_data_by_name(juego.Name)
+            if api_data:
+                juego.Image_URL = api_data.get("Image_URL")
+                try:
+                    juego.save()
+                except Exception as e:
+                    print(f"Error guardando {juego.Name}: {e}")
+        #con esto el context tiene los datos que queremos
+        context["page_obj"] = page_obj
         return context
 
 # apps/juego/views.py
@@ -83,7 +103,27 @@ class GeneroView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["juegos"] = Juego.objects.all()
+        #aca recibimos el genero
+        genero = self.request.GET.get("genero")
+        #creo una lista vacia
+        juegos_qs = ()
+        #llenamos la lista con juegos del genero
+        if genero:
+            juegos_qs = Juego.objects.filter(Genre__iexact=genero)
+        paginator = Paginator(juegos_qs, 5)
+        #repito el proceso de la pagina general y listo
+        page_number = self.request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        for juego in page_obj.object_list:
+            api_data = get_game_data_by_name(juego.Name)
+            if api_data:
+                juego.Image_URL = api_data.get("Image_URL")
+                try:
+                    juego.save()
+                except Exception as e:
+                    print(f"Error guardando {juego.Name}: {e}")
+        context["page_obj"] = page_obj
+        context["genero_actual"] = genero
         return context
 
 
@@ -93,7 +133,27 @@ class PlataformaView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["juegos"] = Juego.objects.all()
+        #aca recibimos la plataforma
+        plataforma = self.request.GET.get("plataforma")
+        #creo una lista vacia
+        juegos_qs = ()
+        #llenamos la lista con juegos de la plataforma
+        if plataforma:
+            juegos_qs = Juego.objects.filter(Platform__iexact=plataforma)
+        paginator = Paginator(juegos_qs, 5)
+        #repito el proceso de la pagina general y listo
+        page_number = self.request.GET.get("page")
+        page_obj = paginator.get_page(page_number)
+        for juego in page_obj.object_list:
+            api_data = get_game_data_by_name(juego.Name)
+            if api_data:
+                juego.Image_URL = api_data.get("Image_URL")
+                try:
+                    juego.save()
+                except Exception as e:
+                    print(f"Error guardando {juego.Name}: {e}")
+        context["page_obj"] = page_obj
+        context["plataforma_actual"] = plataforma
         return context
 
 

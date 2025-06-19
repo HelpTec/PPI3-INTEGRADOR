@@ -3,93 +3,114 @@
   <div class="container">
     <h1>Géneros</h1>
     <div class="genre-container">
-      <button
+      <a href="?genero=Action">
+        <button
         type="button"
         data-genre="Action"
         class="btn genre-button btn-accion"
       >
         Acción
-      </button>
-      <button
+        </button>
+      </a>
+      <a href="?genero=Platform">
+        <button
         type="button"
         data-genre="Platform"
         class="btn genre-button btn-plataforma"
-      >
+        >
         Plataforma
-      </button>
-      <button
+        </button>
+      </a>
+      <a href="?genero=Racing">
+        <button
         type="button"
         data-genre="Racing"
         class="btn genre-button btn-carreras"
-      >
+        >
         Carreras
-      </button>
-      <button
+        </button>
+      </a>
+      <a href="?genero=Role-Playing">
+        <button
         type="button"
         data-genre="Role-Playing"
         class="btn genre-button btn-rpg"
-      >
+        >
         RPG
-      </button>
-      <button
+        </button>
+      </a>
+      <a href="?genero=Fighting">
+        <button
         type="button"
         data-genre="Fighting"
         class="btn genre-button btn-lucha"
-      >
+        >
         Lucha
-      </button>
+        </button>
+      </a>
     </div>
     <div class="genre-container">
-      <button
+      <a href="?genero=Shooter">
+        <button
         type="button"
         data-genre="Shooter"
         class="btn genre-button btn-shooter"
-      >
+        >
         Shooter
-      </button>
-      <button
+        </button>
+      </a>
+      <a href="?genero=Strategy">
+        <button
         type="button"
         data-genre="Strategy"
         class="btn genre-button btn-estrategia"
-      >
+        >
         Estrategia
-      </button>
-      <button
+        </button>
+      </a>
+      <a href="?genero=Simulation">
+        <button
         type="button"
         data-genre="Simulation"
         class="btn genre-button btn-simulador"
-      >
+        >
         Simulador
-      </button>
-      <button
+        </button>
+      </a>
+      <a href="?genero=Sports">
+        <button
         type="button"
         data-genre="Sports"
         class="btn genre-button btn-deportes"
-      >
+        >
         Sports
-      </button>
-      <button
+        </button>
+      </a>
+      <a href="?genero=Puzzle">
+        <button
         type="button"
         data-genre="Puzzle"
         class="btn genre-button btn-rompecabezas"
-      >
+        >
         Rompecabezas
-      </button>
+        </button>
+      </a>
     </div>
     <div class="genre-container">
-      <button
+      <a href="?genero=Adventure">
+        <button
         type="button"
         data-genre="Adventure"
         class="btn genre-button btn-aventura"
-      >
+        >
         Aventura
-      </button>
-      <button type="button" data-genre="Misc" class="btn genre-button btn-misc">
+        </button>
+      </a>
+      <a href="?genero=Misc">
+        <button type="button" data-genre="Misc" class="btn genre-button btn-misc">
         Misc
-      </button>
-      <button type="button" data-genre="All" class="btn genre-button btn-all">
-        Show All
-      </button>
+        </button>
+      </a>
     </div>
   </div>
   <style>
@@ -98,11 +119,13 @@
     }
   </style>
   <main>
+    {% if page_obj %}
     <div id="games-container" class="cards-container" style="margin-top: 40px">
-      {% for juego in juegos %}
-      <div class="card" data-genre="{{ juego.Genre }}" style="display: none">
+      {% for juego in page_obj %}
+      <div class="card">
+        <a href="{% url 'detalle_juego' juego_id=juego.id %}" class="card-link">
         <img
-          src="{% static 'img/tech_diff.png'%}"
+          src="{% if juego.Image_URL %}{{ juego.Image_URL }}{% else %}{% static 'img/tech_diff.png'%}{% endif %}"
           alt="Portada de {{juego.Name}}"
         />
         <div class="card-info">
@@ -111,10 +134,27 @@
           <p><strong>Género:</strong> {{juego.Genre}}</p>
           <p><strong>Género:</strong> {{juego.Platform}}</p>
         </div>
+        </a>
       </div>
       {% endfor %}
+      {% else %}
+        <p>Seleccioná un género para ver los juegos.</p>
+      {% endif %}
     </div>
-    <button id="load-more">Cargar más</button>
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?genero={{ genero_actual }}&page=1">Primera</a>
+          <a href="?genero={{ genero_actual }}&page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a href="?genero={{ genero_actual }}&page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+          <a href="?genero={{ genero_actual }}&page={{ page_obj.paginator.num_pages }}">Última</a>
+        {% endif %}
+      </div>
+    {% endif %}
   </main>
   <script>
     const genreButtons = document.querySelectorAll(".genre-button"); // <-- importante

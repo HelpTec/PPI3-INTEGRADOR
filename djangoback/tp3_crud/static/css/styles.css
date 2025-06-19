@@ -154,3 +154,24 @@ body {
     background-color: #1ed760; /* Lighter green on hover */
     transform: translateY(-2px);
 }
+
+/* el estilo para los paginadores*/
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+}
+
+.pagination a {
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  background-color: #ddd;
+  border-radius: 5px;
+  color: black;
+}
+
+.pagination span {
+  padding: 0.5rem 1rem;
+}

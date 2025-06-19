@@ -3,16 +3,15 @@
 {% block page_content %}
 
 <style>
-  #off {
-  display: none;
- }
+
 </style>
 <main>
       <div id="games-container" class="cards-container">
-        {% for juego in juegos %}
-        <div class="card" id="{% if forloop.counter0 < 5 %}on{% else %}off{% endif %}">
+        {% for juego in page_obj %}
+        <div class="card">
         <a href="{% url 'detalle_juego' juego_id=juego.id %}" class="card-link">
-          <img src= "{% static 'img/tech_diff.png'%}" alt="Portada de {{juego.Name}}" />
+          <img src= "{% if juego.Image_URL %}{{ juego.Image_URL }}{% else %}{% static 'img/tech_diff.png'%}{% endif %}" 
+            alt="Portada de {{juego.Name}}" />
             <div class="card-info">
               <h2>{{juego.Name}}</h2>
               <p><strong>Año:</strong> {{juego.Year}}</p>
@@ -22,21 +21,18 @@
         </div></a>
         {% endfor %}
       </div>
-      <button id="load-more">Cargar más</button>
-    </main>
-    <script>
-      
-const cards = document.querySelectorAll('#games-container .card');
-const blockSize = 5;
+      <div class="pagination">
+        {% if page_obj.has_previous %}
+          <a href="?page=1">Primera</a>
+          <a href="?page={{ page_obj.previous_page_number }}">Anterior</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
 
-document.getElementById('load-more').addEventListener('click', () => {
-  let changed = 0;
-  for (let i = 0; i < cards.length && changed < blockSize; i++) {
-    if (cards[i].id === 'off') {
-      cards[i].id = 'on';
-      changed++;
-    }
-  }
-});
-</script>
+        {% if page_obj.has_next %}
+          <a href="?page={{ page_obj.next_page_number }}">Siguiente</a>
+          <a href="?page={{ page_obj.paginator.num_pages }}">Última</a>
+        {% endif %}
+      </div>
+</main>
+    
 {% endblock %}

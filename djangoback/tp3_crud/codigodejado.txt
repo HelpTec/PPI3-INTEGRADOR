@@ -1,0 +1,16 @@
+//el script que modificaba los estilos de las cards de juego
+<script>
+      
+const cards = document.querySelectorAll('#games-container .card');
+const blockSize = 5;
+
+document.getElementById('load-more').addEventListener('click', () => {
+  let changed = 0;
+  for (let i = 0; i < cards.length && changed < blockSize; i++) {
+    if (cards[i].id === 'off') {
+      cards[i].id = 'on';
+      changed++;
+    }
+  }
+});
+</script>

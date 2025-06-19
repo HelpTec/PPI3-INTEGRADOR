@@ -70,40 +70,74 @@
   <div class="container">
   <h1>Plataformas</h1>
   <div class="platform-container">
-    <button type="button" class="platform-button btn-1">2600</button>
-    <button type="button" class="platform-button btn-2">3DO</button>
-    <button type="button" class="platform-button btn-3">3DS</button>
-    <button type="button" class="platform-button btn-4">DC</button>
-    <button type="button" class="platform-button btn-5">DS</button>
-    <button type="button" class="platform-button btn-6">PS</button>
-    <button type="button" class="platform-button btn-7">PS2</button>
-    <button type="button" class="platform-button btn-8">GB</button>
-    <button type="button" class="platform-button btn-9">GBA</button>
-    <button type="button" class="platform-button btn-10">GC</button>
-    <button type="button" class="platform-button btn-11">GEN</button>
-    <button type="button" class="platform-button btn-12">GG</button>
-    <button type="button" class="platform-button btn-13">PS3</button>
-    <button type="button" class="platform-button btn-1">PS4</button>
-    <button type="button" class="platform-button btn-2">N64</button>
-    <button type="button" class="platform-button btn-3">NES</button>
-    <button type="button" class="platform-button btn-4">NG</button>
-    <button type="button" class="platform-button btn-5">PC</button>
-    <button type="button" class="platform-button btn-6">PCFX</button>
-    <button type="button" class="platform-button btn-7">PSP</button>
-    <button type="button" class="platform-button btn-8">PSV</button>
-    <button type="button" class="platform-button btn-9">SAT</button>
-    <button type="button" class="platform-button btn-10">SCD</button>
-    <button type="button" class="platform-button btn-11">SNES</button>
-    <button type="button" class="platform-button btn-12">TG16</button>
-    <button type="button" class="platform-button btn-13">WS</button>
-    <button type="button" class="platform-button btn-1">Wii</button>
-    <button type="button" class="platform-button btn-2">WiiU</button>
-    <button type="button" class="platform-button btn-3">X360</button>
-    <button type="button" class="platform-button btn-4">XB</button>
-    <button type="button" class="platform-button btn-5">XOne</button>
-    <button type="button" class="platform-button btn-6">Show All</button>
+    <a href="?plataforma=2600"><button type="button" class="platform-button btn-1">2600</button></a>
+    <a href="?plataforma=3DO"><button type="button" class="platform-button btn-2">3DO</button></a>
+    <a href="?plataforma=3DS"><button type="button" class="platform-button btn-3">3DS</button></a>
+    <a href="?plataforma=DC"><button type="button" class="platform-button btn-4">DC</button></a>
+    <a href="?plataforma=DS"><button type="button" class="platform-button btn-5">DS</button></a>
+    <a href="?plataforma=GB"><button type="button" class="platform-button btn-6">GB</button></a>
+    <a href="?plataforma=GBA"><button type="button" class="platform-button btn-7">GBA</button></a>
+    <a href="?plataforma=GC"><button type="button" class="platform-button btn-8">GC</button></a>
+    <a href="?plataforma=GEN"><button type="button" class="platform-button btn-9">GEN</button></a>
+    <a href="?plataforma=GG"><button type="button" class="platform-button btn-10">GG</button></a>
+    <a href="?plataforma=N64"><button type="button" class="platform-button btn-11">N64</button></a>
+    <a href="?plataforma=NES"><button type="button" class="platform-button btn-12">NES</button></a>
+    <a href="?plataforma=NG"><button type="button" class="platform-button btn-13">NG</button></a>
+    <a href="?plataforma=PC"><button type="button" class="platform-button btn-1">PC</button></a>
+    <a href="?plataforma=PCFX"><button type="button" class="platform-button btn-2">PCFX</button></a>
+    <a href="?plataforma=PS"><button type="button" class="platform-button btn-3">PS</button></a>
+    <a href="?plataforma=PS2"><button type="button" class="platform-button btn-4">PS2</button></a>
+    <a href="?plataforma=PS3"><button type="button" class="platform-button btn-5">PS3</button></a>
+    <a href="?plataforma=PS4"><button type="button" class="platform-button btn-6">PS4</button></a>
+    <a href="?plataforma=PSP"><button type="button" class="platform-button btn-7">PSP</button></a>
+    <a href="?plataforma=PSV"><button type="button" class="platform-button btn-8">PSV</button></a>
+    <a href="?plataforma=SAT"><button type="button" class="platform-button btn-9">SAT</button></a>
+    <a href="?plataforma=SCD"><button type="button" class="platform-button btn-10">SCD</button></a>
+    <a href="?plataforma=SNES"><button type="button" class="platform-button btn-11">SNES</button></a>
+    <a href="?plataforma=TG16"><button type="button" class="platform-button btn-12">TG16</button></a>
+    <a href="?plataforma=Wii"><button type="button" class="platform-button btn-13">Wii</button></a>
+    <a href="?plataforma=WiiU"><button type="button" class="platform-button btn-1">WiiU</button></a>
+    <a href="?plataforma=WS"><button type="button" class="platform-button btn-2">WS</button></a>
+    <a href="?plataforma=X360"><button type="button" class="platform-button btn-3">X360</button></a>
+    <a href="?plataforma=XB"><button type="button" class="platform-button btn-4">XB</button></a>
+    <a href="?plataforma=XOne"><button type="button" class="platform-button btn-5">XOne</button></a>
   </div>
   </div>
-  <script></script>
+  {% if page_obj %}
+    <div id="games-container" class="cards-container" style="margin-top: 40px">
+      {% for juego in page_obj %}
+      <div class="card">
+        <a href="{% url 'detalle_juego' juego_id=juego.id %}" class="card-link">
+        <img
+          src="{% if juego.Image_URL %}{{ juego.Image_URL }}{% else %}{% static 'img/tech_diff.png'%}{% endif %}"
+          alt="Portada de {{juego.Name}}"
+        />
+        <div class="card-info">
+          <h2>{{juego.Name}}</h2>
+          <p><strong>Año:</strong> {{juego.Year}}</p>
+          <p><strong>Género:</strong> {{juego.Genre}}</p>
+          <p><strong>Género:</strong> {{juego.Platform}}</p>
+        </div>
+        </a>
+      </div>
+      {% endfor %}
+      {% else %}
+        <p>Seleccioná un género para ver los juegos.</p>
+      {% endif %}
+    </div>
+    {% if page_obj.has_other_pages %}
+    <div class="pagination">
+        {% if page_obj.has_previous %}
+         <a href="?plataforma={{ plataforma_actual }}&page=1">Primera</a>
+         <a href="?plataforma={{ plataforma_actual }}&page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
+        {% endif %}
+        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+
+        {% if page_obj.has_next %}
+          <a href="?plataforma={{ plataforma_actual }}&page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
+          <a href="?plataforma={{ plataforma_actual }}&page={{ page_obj.paginator.num_pages }}">Última</a>
+        {% endif %}
+      </div>
+    {% endif %}
   {% endblock %}
 </main>
