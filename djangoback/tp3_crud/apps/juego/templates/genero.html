@@ -2,6 +2,7 @@
 <body>
   <div class="container">
     <h1>Géneros</h1>
+            <p>Seleccioná un género para ver los juegos.</p>
     <div class="genre-container">
       <a href="?genero=Action">
         <button
@@ -138,7 +139,7 @@
       </div>
       {% endfor %}
       {% else %}
-        <p>Seleccioná un género para ver los juegos.</p>
+
       {% endif %}
     </div>
     {% if page_obj.has_other_pages %}

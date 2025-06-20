@@ -19,11 +19,11 @@ class RegistroForm(UserCreationForm):
             'required': True
         })
     )
-    username = forms.CharField(
+    correo = forms.CharField(
         label="Nombre de usuario",
         widget=forms.TextInput(attrs={
             'placeholder': 'Ingresá tu usuario',
-            'id': 'username',
+            'id': 'correo',
             'required': True,
             'minlength': 8
         })
@@ -31,4 +31,4 @@ class RegistroForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['username', 'password1', 'password2']
+        fields = ['correo', 'password1', 'password2']

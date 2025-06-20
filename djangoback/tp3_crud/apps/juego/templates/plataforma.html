@@ -69,6 +69,7 @@
 <main>
   <div class="container">
   <h1>Plataformas</h1>
+          <p>Seleccioná una plataforma para ver los juegos.</p>
   <div class="platform-container">
     <a href="?plataforma=2600"><button type="button" class="platform-button btn-1">2600</button></a>
     <a href="?plataforma=3DO"><button type="button" class="platform-button btn-2">3DO</button></a>
@@ -122,7 +123,7 @@
       </div>
       {% endfor %}
       {% else %}
-        <p>Seleccioná una plataforma para ver los juegos.</p>
+
       {% endif %}
     </div>
     {% if page_obj.has_other_pages %}

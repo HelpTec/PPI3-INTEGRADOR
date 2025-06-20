@@ -104,10 +104,9 @@
         <form method="post" id="registerForm" novalidate>
             {% csrf_token %}
 
-            <label for="{{ form.username.id_for_label }}">{{ form.username.label }}</label>
+            <label for="{{ form.username.id_for_label }}">Correo electrónico</label>
             {{ form.username }}
             <div class="message">
-                <p>* Requerido, máximo 150 caracteres. Letras, dígitos y @/./+/-/_ solamente.</p>
                 {% if form.username.errors %}
                     <div class="error" style="display: block;">{# Show error messages if present #}
                         {{ form.username.errors }}
@@ -115,7 +114,7 @@
                 {% endif %}
             </div>
 
-            <label for="{{ form.password1.id_for_label }}">{{ form.password1.label }}</label>
+            <label for="{{ form.password1.id_for_label }}">Contraseña</label>
             {{ form.password1 }}
             <div class="message">
                 <p>
@@ -129,10 +128,9 @@
                 {% endif %}
             </div>
 
-            <label for="{{ form.password2.id_for_label }}">{{ form.password2.label }}</label>
+            <label for="{{ form.password2.id_for_label }}">Repetir contraseña</label>
             {{ form.password2 }}
             <div class="message">
-                <p>Ingresar la misma contraseña que antes, para verificación.</p>
                 {% if form.password2.errors %}
                     <div class="error" style="display: block;">
                         {{ form.password2.errors }}

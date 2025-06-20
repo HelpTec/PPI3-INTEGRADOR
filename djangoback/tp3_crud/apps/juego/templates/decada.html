@@ -4,6 +4,7 @@
     color: white;
   }
 
+  /* Apply the same styling as genre-container */
   .decada-container {
     margin-top: 20px;
     display: flex;
@@ -44,49 +45,76 @@
   } /* Firebrick Red */
 </style>
 <main>
-  <h1>Decadas</h1>
-  <div class="decada-container">
-    <a href="?decada=1980"><button type="button" class="decada-button btn-1980">1980</button></a>
-    <a href="?decada=1990"><button type="button" class="decada-button btn-1990">1990</button></a>
-    <a href="?decada=2000"><button type="button" class="decada-button btn-2000">2000</button></a>
-    <a href="?decada=2010"><button type="button" class="decada-button btn-2010">2010</button></a>
-    <a href="?decada=2020"><button type="button" class="decada-button btn-2020">2020</button></a>
-  </div>
-  {% if page_obj %}
+  <div class="container">
+    <h1>Décadas</h1>
+          <p>Seleccioná una década para ver los juegos.</p>
+    <div class="decada-container">
+      <a href="?decada=1980"
+        ><button type="button" class="decada-button btn-1980">
+          1980
+        </button></a
+      >
+      <a href="?decada=1990"
+        ><button type="button" class="decada-button btn-1990">
+          1990
+        </button></a
+      >
+      <a href="?decada=2000"
+        ><button type="button" class="decada-button btn-2000">
+          2000
+        </button></a
+      >
+      <a href="?decada=2010"
+        ><button type="button" class="decada-button btn-2010">
+          2010
+        </button></a
+      >
+      <a href="?decada=2020"
+        ><button type="button" class="decada-button btn-2020">
+          2020
+        </button></a
+      >
+    </div>
+    {% if page_obj %}
     <div id="games-container" class="cards-container" style="margin-top: 40px">
       {% for juego in page_obj %}
       <div class="card">
         <a href="{% url 'detalle_juego' juego_id=juego.id %}" class="card-link">
-        <img
-          src="{% if juego.Image_URL %}{{ juego.Image_URL }}{% else %}{% static 'img/tech_diff.png'%}{% endif %}"
-          alt="Portada de {{juego.Name}}"
-        />
-        <div class="card-info">
-          <h2>{{juego.Name}}</h2>
-          <p><strong>Año:</strong> {{juego.Year}}</p>
-          <p><strong>Género:</strong> {{juego.Genre}}</p>
-          <p><strong>Género:</strong> {{juego.Platform}}</p>
-        </div>
+          <img
+            src="{% if juego.Image_URL %}{{ juego.Image_URL }}{% else %}{% static 'img/tech_diff.png'%}{% endif %}"
+            alt="Portada de {{juego.Name}}"
+          />
+          <div class="card-info">
+            <h2>{{juego.Name}}</h2>
+            <p><strong>Año:</strong> {{juego.Year}}</p>
+            <p><strong>Género:</strong> {{juego.Genre}}</p>
+            <p><strong>Género:</strong> {{juego.Platform}}</p>
+          </div>
         </a>
       </div>
-      {% endfor %}
-      {% else %}
-        <p>Seleccioná una decada para ver los juegos.</p>
+      {% endfor %} {% else %}
       {% endif %}
     </div>
     {% if page_obj.has_other_pages %}
     <div class="pagination">
-        {% if page_obj.has_previous %}
-         <a href="?decada={{ decada_actual }}&page=1">Primera</a>
-         <a href="?decada={{ decada_actual }}&page={{ page_obj.previous_page_number }}">{{ page_obj.previous_page_number }}</a>
-        {% endif %}
-        <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
+      {% if page_obj.has_previous %}
+      <a href="?decada={{ decada_actual }}&page=1">Primera</a>
+      <a href="?decada={{ decada_actual }}&page={{ page_obj.previous_page_number }}"
+        >{{ page_obj.previous_page_number }}</a
+      >
+      {% endif %}
+      <span>Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</span>
 
-        {% if page_obj.has_next %}
-          <a href="?decada={{ decada_actual }}&page={{ page_obj.next_page_number }}">{{ page_obj.next_page_number }}</a>
-          <a href="?decada={{ decada_actual }}&page={{ page_obj.paginator.num_pages }}">Última</a>
-        {% endif %}
-      </div>
+      {% if page_obj.has_next %}
+      <a href="?decada={{ decada_actual }}&page={{ page_obj.next_page_number }}"
+        >{{ page_obj.next_page_number }}</a
+      >
+      <a href="?decada={{ decada_actual }}&page={{ page_obj.paginator.num_pages }}"
+        >Última</a
+      >
+      {% endif %}
+    </div>
     {% endif %}
+  </div>
 </main>
 {% endblock %}

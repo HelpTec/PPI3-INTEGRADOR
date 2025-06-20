@@ -34,7 +34,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+LOGOUT_REDIRECT_URL = '/home/'
 # Application definition
 
 DJANGO_APPS = [

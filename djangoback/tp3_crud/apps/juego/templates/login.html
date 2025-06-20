@@ -7,271 +7,193 @@
         margin: 0;
         padding: 0;
         width: 100%;
-        height: 100%; /* Ensure body takes full height for proper flex behavior */
-        overflow-x: hidden; /* Prevent horizontal scrollbar if elements slightly overflow */
-    }
-
-    html, body {
-        margin: 0;
-        padding: 0;
-        width: 100%;
-        height: 100%; /* Ensure body takes full height for proper flex behavior */
-        overflow-x: hidden; /* Prevent horizontal scrollbar if elements slightly overflow */
-        background-color: #111; /* Changed to #111 for the fade effect */
+        height: 100%;
+        overflow-x: hidden;
+        background-color: #111; /* Dark background for the page */
+        color: #e0e0e0; /* Default light text color */
+        line-height: 1.6;
     }
 
     .header-image-container {
         width: 100%;
-        height: 250px; /* Increased height slightly for more noticeable fade area */
+        height: 250px;
         background-image: url("{% static 'img/mario.png' %}");
         background-size: cover;
         background-position: center;
         background-repeat: no-repeat;
         position: relative;
-        flex-shrink: 0; /* Prevents this from shrinking if other content is tall */
-
-        /* --- Image Fade Out Effect --- */
-        /* This creates a gradient overlay on top of the image */
-        display: flex; /* Use flex to align content (if any) inside this container */
-        align-items: flex-end; /* Align to the bottom for fade from bottom */
-        justify-content: center; /* Center horizontally if content inside */
+        flex-shrink: 0;
     }
 
+    /* --- Image Fade Out Effect --- */
     .header-image-container::after {
         content: '';
         position: absolute;
-        bottom: 0; /* Start gradient from the bottom */
+        bottom: 0;
         left: 0;
         width: 100%;
-        height: 100%; /* Cover the entire image height */
-        /* Gradient from transparent (at 0% of its own height) to #111 (at 100% of its own height) */
-        /* rgba(17,17,17,1) is the RGBA equivalent of #111 */
-        background: linear-gradient(to bottom, rgba(17,17,17,0) 0%, rgba(17,17,17,0) 70%, rgba(17,17,17,1) 100%); 
-        pointer-events: none; /* Allows clicks to pass through the gradient */
+        height: 100%;
+        /* Gradient from transparent to the page background color */
+        background: linear-gradient(to bottom, rgba(17,17,17,0) 0%, rgba(17,17,17,0) 70%, rgba(17,17,17,1) 100%);
+        pointer-events: none;
     }
 
-
-    .content-wrapper {
-        flex-grow: 1; /* Allows this wrapper to take up remaining vertical space */
-        display: flex; /* Arranges left and right panels side-by-side */
-        /* justify-content: space-between;  <--- REMOVE OR CHANGE THIS */
-        justify-content: center; /* <--- ADDED: Centers the entire content (left and right panels) horizontally */
-        align-items: flex-start; /* Aligns them to the top */
-        padding: 40px 20px; /* Padding around the content */
-        gap: 80px; /* <--- ADDED: Space between the left and right panels, adjust as needed */
-    }
-
-    .left-panel {
-        /* We no longer need flex: 1 to make it take available space;
-           instead, we'll just let its content define its width.
-           We might need a fixed width or max-width if it gets too wide. */
-        /* flex: 1; */
-        min-width: 300px; /* Minimum width for the left panel */
-        /* padding-right: 20px; <--- No longer needed with 'gap' on content-wrapper */
-    }
-
-    .right-panel {
-        background-color: #1a1a1a; /* Changed from white to dark background */
-        padding: 2.5em; /* Slightly more padding */
-        border-radius: 15px; /* Rounded corners */
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Consistent shadow */
-        width: 100%; /* Make it responsive */
-        max-width: 400px; /* Max width to keep it from being too wide */
-        margin: 50px auto; /* Center horizontally with top/bottom margin */
-        color: #e0e0e0; /* Light text color for labels and general text */
+    /* --- NEW SINGLE COLUMN LAYOUT --- */
+    .main-container {
+        display: flex;
+        flex-direction: column; /* Stacks items (logo, form) vertically */
+        align-items: center;    /* Centers items horizontally */
+        padding: 40px 20px;     /* Adds padding around the content */
     }
 
     .gamebase-logo {
-        display: flex;
-        align-items: center;
-        margin-bottom: 20px;
+        margin-bottom: 30px; /* Space between logo and form */
     }
 
     .gamebase-logo img {
         width: 200px;
         height: 60px;
-        margin-right: 10px;
     }
 
-    .form-floating label {
-        color: #adb5bd;
-    }
-
-    .form-control-dark {
-        background-color: #3b3b3b;
-        color: #f8f9fa;
-        border: 1px solid #4a4a4a;
-    }
-
-    .form-control-dark:focus {
-        background-color: #3b3b3b;
-        color: #f8f9fa;
-        border-color: #0d6efd;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-    }
-
-    .input-group-text-dark {
-        background-color: #3b3b3b;
-        border: 1px solid #4a4a4a;
-        color: #adb5bd;
-    }
-
-    .btn-primary-custom {
-        background-color: #007bff;
-        border-color: #007bff;
+    /* --- FORM CONTAINER STYLES (Previously .right-panel) --- */
+    .form-container {
+        background-color: #1a1a1a; /* Dark form background */
+        padding: 2.5em;
+        border-radius: 15px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         width: 100%;
-        margin-bottom: 15px;
+        max-width: 400px; /* Constrains the width of the form */
     }
 
-    .btn-primary-custom:hover {
-        background-color: #0056b3;
-        border-color: #0056b3;
+    .form-container label {
+        display: block;
+        margin-bottom: 0.5em;
+        font-weight: bold;
+        color: #ffffff; /* White color for labels */
     }
 
-    .btn-secondary-custom { /* Changed from btn-google as per screenshot */
-        background-color: #6c757d; /* A more neutral color */
-        border-color: #6c757d;
-        color: #fff;
+    .form-container input[type="email"],
+    .form-container input[type="password"] {
         width: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
+        padding: 0.7em;
+        margin-bottom: 1.5em;
+        border: 1px solid #555; /* Darker border */
+        border-radius: 8px; /* Rounded corners */
+        background-color: #282828; /* Dark input background */
+        color: #e0e0e0;
+        box-sizing: border-box; /* Ensures padding doesn't affect width */
     }
 
-    .btn-secondary-custom:hover {
-        background-color: #5a6268;
-        border-color: #545b62;
+    .form-container input[type="email"]::placeholder,
+    .form-container input[type="password"]::placeholder {
+        color: #999; /* Lighter placeholder text */
     }
 
+    .btn-login {
+        width: 100%;
+        padding: 0.8em;
+        background-color: #1DB954; /* Spotify Green */
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        cursor: pointer;
+        font-size: 1.1em;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+    }
 
-
-    /* Divider text "O" */
-    .divider-text {
+    .btn-login:hover {
+        background-color: #1ed760; /* Lighter green on hover */
+        transform: translateY(-2px); /* Slight lift effect */
+    }
+    
+    .register-link {
+        display: block;
         text-align: center;
-        margin: 15px 0;
-        color: #adb5bd;
-        font-size: 0.9rem;
-        position: relative;
+        margin-top: 1.5em;
+        color: #b0b0b0;
+        text-decoration: none;
+        font-size: 0.95em;
+    }
+    
+    .register-link:hover {
+        color: #ffffff;
+        text-decoration: underline;
     }
 
-    .divider-text::before,
-    .divider-text::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        width: 40%;
-        height: 1px;
-        background: #4a4a4a;
+    /* Django messages styling */
+    .messages {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1.5em;
+    }
+    .messages li {
+        padding: 0.7em;
+        border-radius: 8px;
+        background-color: #ff6347; /* Error color */
+        color: white;
+        text-align: center;
     }
 
-    .divider-text::before {
-        left: 0;
-    }
-
-    .divider-text::after {
-        right: 0;
-    }
-
-
-    /* Media queries para responsividad */
-    @media (max-width: 768px) {
-        .content-wrapper {
-            flex-direction: column; /* Apila los paneles en pantallas pequeñas */
-            align-items: center; /* Centra los paneles */
-            padding: 20px; /* Adjust padding for smaller screens */
-            gap: 0; /* Remove gap on mobile when stacked */
-        }
-        .left-panel,
-        .right-panel {
-            width: 100%; /* Ocupa más ancho en móvil */
-            padding: 0; /* Remove padding */
-            max-width: unset; /* Remove max-width on mobile for better fit */
-        }
-        .left-panel {
-            margin-bottom: 30px; /* Espacio entre los paneles apilados */
-            padding-right: 0;
-            text-align: center; /* Centra el logo y el texto en móvil */
+    /* --- RESPONSIVE DESIGN --- */
+    @media (max-width: 576px) {
+        .form-container {
+            padding: 2em 1.5em; /* Adjust padding on smaller screens */
         }
     }
 </style>
-    <div class="header-image-container">
-        </div>
 
-    <div class="content-wrapper">
-      <div class="left-panel">
-        <div class="gamebase-logo">
-          <img src="{% static 'img/logoGB.png' %}" alt="GameBase Logo" />
-        </div>
-        <h2>Ingresar</h2>
-      </div>
+<div class="header-image-container"></div>
 
-      <div class="right-panel">
+<div class="main-container">
+    <div class="gamebase-logo">
+        <img src="{% static 'img/logoGB.png' %}" alt="GameBase Logo" />
+    </div>
+
+    <div class="form-container">
         {% if messages %}
-        <ul class="messages">
-        {% for message in messages %}
-          <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
-        {{ message }}
-          </li>
-          {% endfor %}
-          </ul>
+            <ul class="messages">
+                {% for message in messages %}
+                    <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>
+                        {{ message }}
+                    </li>
+                {% endfor %}
+            </ul>
         {% endif %}
+
         <form method="post">
-          {% csrf_token %}
-          <div class="mb-3">
-            <label for="username" class="form-label visually-hidden"
-              >Correo electrónico</label
-            >
-            <div class="input-group">
-              <span class="input-group-text input-group-text-dark"
-                ><i class="bi bi-envelope"></i
-              ></span>
-              <input
+            {% csrf_token %}
+            
+            <label for="username">Correo electrónico</label>
+            <input
                 type="email"
                 name="username"
-                class="form-control form-control-dark"
                 id="username"
                 placeholder="Correo electrónico"
                 required
-              />
-            </div>
-          </div>
-          <div class="mb-3">
-            <label for="password" class="form-label visually-hidden"
-              >Contraseña</label
-            >
-            <div class="input-group">
-              <span class="input-group-text input-group-text-dark"
-                ><i class="bi bi-lock"></i
-              ></span>
-              <input
+            />
+            
+            <label for="password">Contraseña</label>
+            <input
                 type="password"
                 name="password"
-                class="form-control form-control-dark"
                 id="password"
                 placeholder="Contraseña"
                 required
-              />
-            </div>
-          </div>
-          <button type="submit" class="btn btn-primary-custom">Login</button>
+            />
 
+            <button type="submit" class="btn-login">Ingresar</button>
 
-
-          <div class="divider-text">O</div>
-
-          <a href="/register">
-            <button type="button" class="btn btn-secondary-custom">
-              Registrarse!
-            </button>
-          </a>
+            <a href="/register" class="register-link">
+                No tienes una cuenta? Registrate!
+            </a>
         </form>
-      </div>
     </div>
+</div>
 
-    <script
-      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
-      integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
-      crossorigin="anonymous"
-    ></script>
+<script
+    src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"
+></script>
 {% endblock %}
