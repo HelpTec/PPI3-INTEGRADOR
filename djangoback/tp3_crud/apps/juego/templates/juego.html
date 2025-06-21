@@ -1,81 +1,17 @@
-{% extends 'base.html' %} {# This should extend your template with the navbar #}
-{% load static %} {# Make sure static is loaded for default_game_banner.jpg #}
+{% extends 'base.html' %}
+{% load static %}
+{% load genre_tags %} {# Load your custom filter here #}
 
 {% block title %}Detalle de {{ juego.Name }}{% endblock %}
 
-{% block extra_head %} {# This content goes into the <head> section of index.html #}
+{% block extra_head %}
     <style>
-        /* All CSS for this page is handled here */
-
-        /* General Body Styling (from styles.css, keeping only overrides if necessary) */
-        body { 
-            line-height: 1.6; /* Keeping this specific override if desired for this page only */
-        }
-
-        /* Specific container for the main content area of this page */
-        /* .container class should be handled by styles.css and Bootstrap */
-        .main-content {
-            padding: 20px; /* Added general padding for all sides */
-            max-width: 1200px; /* Aligns with the overall content width */
-            margin: 0 auto; /* Centers the content */
-        }
-
-        /* Updated Game Banner Styles for specific color and border-radius */
-        .game-banner {
-            /* Removed display:flex, flex-wrap, gap as Bootstrap's .row will handle it */
-            margin-bottom: 30px;
-            /* align-items: center; handled by align-items-center on .row */
-            background-color: #1E1E1E; /* Updated: Dark background for this container */
-            padding: 30px; /* More padding for card feel */
-            border-radius: 20px; /* Updated: More rounded corners */
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Stronger shadow for depth */
-            overflow: hidden; /* Ensure rounded corners clip content */
-            position: relative; /* For genre tag positioning */
-        }
-
-        .game-banner-image {
-            /* Removed flex properties, min-width, as Bootstrap .col will handle width */
-            max-height: 400px; /* Max height for the image container */
-            overflow: hidden; /* Clip image if it overflows */
-            border-radius: 8px; /* Rounded corners for image */
-        }
-
-        /* Corrected: This now matches the class applied in HTML */
-        .game-cover {
-            width: 100%;
-            height: 100%; /* Make image fill container */
-            object-fit: cover; /* Cover the area, crop if needed */
-            display: block; /* Remove extra space below image */
-        }
-
-        .game-banner-details {
-            /* Removed flex properties, min-width, as Bootstrap .col will handle width */
-            padding: 20px;
-            color: #e0e0e0; /* Light text for details */
-        }
-
-        .game-banner-details h1 {
-            color: #ffffff; /* Brighter white for title */
-            margin-bottom: 15px;
-            font-size: 3em; /* Larger title */
-            line-height: 1.2;
-        }
-
-        .game-banner-details p {
-            margin-bottom: 10px; /* More space between paragraphs */
-            font-size: 1.1em;
-            color: #b0b0b0; /* Slightly muted light text for body */
-        }
-        .game-banner-details p strong {
-            color: #ffffff; /* Stronger white for labels */
-        }
-
-        /* Genre Tag Styling */
+        /* Keep your existing .genre-tag base styles */
         .genre-tag {
             position: absolute;
             top: 20px;
             right: 20px;
-            background-color: #1DB954; /* Spotify Green accent */
+            /* Removed background-color here, as it will be set by the dynamic class */
             color: white;
             padding: 8px 15px;
             border-radius: 20px;
@@ -83,57 +19,112 @@
             font-size: 0.9em;
             text-transform: uppercase;
             letter-spacing: 0.5px;
-            z-index: 10; /* Ensure it's above other elements */
+            z-index: 10;
         }
 
-        .sales-info {
-            background-color: #1a1a1a; /* Dark card background */
+        /* Include the specific genre button styles directly in this <style> block,
+           or better yet, move them to your main CSS file (e.g., styles.css) */
+        .btn-accion { background-color: #8a2be2; } /* Purple */
+        .btn-plataforma { background-color: #ffa500; } /* Orange */
+        .btn-carreras { background-color: #3366cc; } /* Dark Blue */
+        .btn-rpg { background-color: #8bc34a; } /* Lime Green */
+        .btn-lucha { background-color: #333333; } /* Dark Gray */
+        .btn-shooter { background-color: #b22222; } /* Firebrick Red */
+        .btn-estrategia { background-color: #4caf50; } /* Green */
+        .btn-simulador { background-color: #9370db; } /* Medium Purple */
+        .btn-deportes { background-color: #20b2aa; } /* Light Sea Green */
+        .btn-rompecabezas { background-color: #1a5222; } /* Darker Green */
+        .btn-aventura { background-color: #a00000; } /* Dark Red */
+        .btn-misc { background-color: #008cba; } /* Blue */
+        .btn-all { background-color: #941376; } /* Cereza (if you need a general default) */
+
+        /* All other CSS for this page... */
+        body { 
+            line-height: 1.6;
+        }
+        .main-content {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .game-banner {
+            margin-bottom: 30px;
+            background-color: #1E1E1E;
             padding: 30px;
-            border-radius: 12px; /* More rounded corners */
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            position: relative;
+        }
+        .game-banner-image {
+            max-height: 400px;
+            overflow: hidden;
+            border-radius: 8px;
+        }
+        .game-cover {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .game-banner-details {
+            padding: 20px;
+            color: #e0e0e0;
+        }
+        .game-banner-details h1 {
+            color: #ffffff;
+            margin-bottom: 15px;
+            font-size: 3em;
+            line-height: 1.2;
+        }
+        .game-banner-details p {
+            margin-bottom: 10px;
+            font-size: 1.1em;
+            color: #b0b0b0;
+        }
+        .game-banner-details p strong {
+            color: #ffffff;
+        }
+        .sales-info {
+            background-color: #1a1a1a;
+            padding: 30px;
+            border-radius: 12px;
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
             text-align: center;
             margin-bottom: 20px;
-            color: #e0e0e0; /* Light text for sales info */
+            color: #e0e0e0;
         }
-
         .sales-info h2 {
             color: #ffffff;
-            margin-bottom: 25px; /* More space below title */
+            margin-bottom: 25px;
             font-size: 2.2em;
         }
-
         .chart-container {
             width: 100%;
-            max-width: 600px; /* Slightly larger max width for the chart */
-            height: 400px; /* Fixed height for consistent chart size */
-            margin: 0 auto; /* Centers the chart */
+            max-width: 600px;
+            height: 400px;
+            margin: 0 auto;
         }
-
-        /* Chart.js specific styling for text */
         canvas {
-            background-color: #1a1a1a; /* Dark background for the chart area */
+            background-color: #1a1a1a;
             border-radius: 8px;
             padding: 10px;
         }
-
-        /* Responsive adjustments for game banner are now mostly handled by Bootstrap .col classes.
-           The media query below only adjusts chart size. */
         @media (max-width: 992px) { 
             .chart-container {
-                max-width: 100%; /* Allow chart to take full width of its container */
-                height: 300px; /* Reduce chart height on smaller screens */
+                max-width: 100%;
+                height: 300px;
             }
-            .game-banner-details h1 { /* Smaller title on smaller screens */
+            .game-banner-details h1 {
                 font-size: 2.5em; 
             }
             .sales-info h2 {
                 font-size: 2em;
             }
         }
-
         @media (max-width: 576px) {
             .game-banner-details h1 {
-                font-size: 2em; /* Even smaller title on very small screens */
+                font-size: 2em;
             }
             .sales-info h2 {
                 font-size: 1.8em;
@@ -142,25 +133,24 @@
     </style>
 {% endblock %}
 
-{% block page_content %} {# This is the content block specific to juego.html #}
+{% block page_content %}
 <main class="main-content">
     <section class="game-banner">
-        <div class="genre-tag">{{ juego.Genre|default:"N/A" }}</div>
+        {# Apply the dynamic class based on juego.Genre #}
+        <div class="genre-tag {{ juego.Genre|genre_to_class }}">
+            {{ juego.Genre|default:"N/A" }}
+        </div>
         
-        {# Bootstrap row to contain image and details side-by-side #}
-        <div class="row g-4 align-items-center justify-content-center w-100 mx-0"> {# w-100 and mx-0 to ensure row takes full width of banner and no extra margin #}
-            {# Image Column #}
-            <div class="col-12 col-md-4 col-lg-3 game-banner-image"> {# Stacks on mobile, 4 columns on md, 3 on lg #}
+        <div class="row g-4 align-items-center justify-content-center w-100 mx-0">
+            <div class="col-12 col-md-4 col-lg-3 game-banner-image">
                 {% if juego.Image_URL %}
-                    <img src="{{ juego.Image_URL }}" alt="Cover of {{ juego.Name }}" class="img-fluid rounded game-cover"> {# img-fluid makes image responsive #}
+                    <img src="{{ juego.Image_URL }}" alt="Cover of {{ juego.Name }}" class="img-fluid rounded game-cover">
                 {% else %}
-                    {# Fallback to a default image if no API image is found or available #}
                     <img src="{% static 'img/tech_diff.png' %}" alt="Default game cover" class="img-fluid rounded game-cover default">
                 {% endif %}
             </div>
             
-            {# Details Column #}
-            <div class="col-12 col-md-8 col-lg-9 game-banner-details"> {# Stacks on mobile, 8 columns on md, 9 on lg (remaining space) #}
+            <div class="col-12 col-md-8 col-lg-9 game-banner-details">
                 <h1>{{ juego.Name }}</h1>
                 <p><strong>Plataforma:</strong> {{ juego.Platform|default:"N/A" }}</p>
                 <p><strong>Año de Lanzamiento:</strong> {{ juego.Year|default:"N/A" }}</p>
@@ -185,7 +175,6 @@
 </script>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-
         console.log("Sales data inside DOMContentLoaded:", salesData);
 
         const labels = ['Norte América', 'Europa', 'Japón', 'Otros'];
@@ -207,10 +196,10 @@
                     label: 'Ventas en Millones',
                     data: data,
                     backgroundColor: [
-                        'rgba(29, 185, 84, 0.7)',
-                        'rgba(30, 215, 96, 0.7)',
-                        'rgba(255, 128, 0, 0.7)',
-                        'rgba(150, 150, 150, 0.7)'
+                        'rgba(223,0,36, 0.7)',
+                        'rgba(243,195,0, 0.7)',
+                        'rgba(0,171,159, 0.7)',
+                        'rgba(46,109,180, 0.7)'
                     ],
                     borderColor: '#121212',
                     borderWidth: 2
