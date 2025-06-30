@@ -8,6 +8,9 @@ body {
     margin: 0;
     padding: 0;
 }
+.vistas{
+    min-height: 60vh;
+}
 
 /* Navbar styles to match the dark theme */
 .navbar {
