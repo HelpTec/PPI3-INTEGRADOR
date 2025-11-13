@@ -2,14 +2,12 @@
 import os
 import django
 from decouple import config
+from django.contrib.auth import authenticate
+from ldap3 import Server, Connection, ALL
 
-# Configura Django
+# CONFIGURAR DJANGO
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'tp3_crud.settings')  # ← CAMBIA AQUÍ
 django.setup()
-
-from django.contrib.auth import authenticate
-from django_python3_ldap.ldap import connection
-from ldap3 import Server, Connection, ALL, SUBTREE
 
 print("PROBANDO CONEXIÓN LDAP con ldap3...\n")
 
@@ -18,7 +16,8 @@ try:
     server = Server(
         host=config('LDAP_AUTH_URL').replace('ldap://', ''),  
         port=389,
-        use_ssl=False  # Cambia a True si usas LDAPS
+        use_ssl=False,
+        get_info=ALL
     )
     
     conn = Connection(
@@ -26,7 +25,6 @@ try:
         user=config('LDAP_AUTH_CONNECTION_USERNAME'),
         password=config('LDAP_AUTH_CONNECTION_PASSWORD'),
         auto_bind=True,
-        client_strategy='SYNC',
         receive_timeout=10
     )
     
@@ -34,21 +32,19 @@ try:
     print(f"  URL: {config('LDAP_AUTH_URL')}")
     print(f"  Bind DN: {config('LDAP_AUTH_CONNECTION_USERNAME')}")
     
-    
-
 except Exception as e:
     print(f"FALLO EN CONEXIÓN: {e}")
     print("Posibles causas:")
     print("  - IP incorrecta o puerto 389 bloqueado")
     print("  - Usuario bind o contraseña incorrectos")
     print("  - Firewall en la VM")
+    exit(1)  # Salir si falla el bind
 
 print("\n" + "="*60)
 print("PROBANDO LOGIN DE USUARIO...\n")
 
 # === PRUEBA DE LOGIN ===
-user = authenticate(username="pruebaldap", password="Test123!")
-print(user)
+user = authenticate(username="SILVIA.TAPIA", password="Test123!")
 if user:
     print(f"LOGIN EXITOSO!")
     print(f"  Usuario: {user.username}")
@@ -58,28 +54,26 @@ else:
     print("FALLO EN LOGIN")
     print("Posibles causas:")
     print("  - Contraseña incorrecta")
-    print("  - Usuario no en grupo DjangoUsers")
+    print("  - Usuario no en grupo GG_Gerencia")
     print("  - Filtro de búsqueda mal configurado")
-conn.unbind()
-# ==PRUEBA DE BUSQUEDA==
-#!/usr/bin/env python
-import ldap3
 
-# === CONFIGURACIÓN ===
-LDAP_URL = "ldap://"
-BIND_DN = ""
-BIND_PW = ""
+print("\n" + "="*60)
+print("PROBANDO BÚSQUEDA CON ldap3 PURO...\n")
 
-SEARCH_BASE = ""
-USERNAME = ""
-FILTER = f"(sAMAccountName={USERNAME})"
-
-print("PROBANDO BÚSQUEDA CON ldap3 PURO (CORREGIDO)...\n")
-
+# === PRUEBA DE BÚSQUEDA ===
 try:
-    # CONECTAR
-    server = ldap3.Server(LDAP_URL, get_info=ldap3.ALL)
-    conn = ldap3.Connection(
+    LDAP_URL = "ldap://192.168.1.53:389"
+    BIND_DN = "CN=ldap_service,CN=Users,DC=IFTS,DC=local"
+    BIND_PW = "BindPass123"
+    SEARCH_BASE = "DC=IFTS,DC=local"
+    USERNAME = "pruebaldap"  # ← AQUÍ VA EL sAMAccountName REAL
+    FILTER = f"(sAMAccountName={USERNAME})"
+
+    print(f"Buscando: {USERNAME}")
+    print(f"Filtro: {FILTER}\n")
+
+    server = Server(LDAP_URL, get_info=ALL)
+    conn = Connection(
         server,
         user=BIND_DN,
         password=BIND_PW,
@@ -87,7 +81,6 @@ try:
     )
     print("BIND OK CON ldap_service\n")
 
-    # BÚSQUEDA → SIN 'dn'
     conn.search(
         search_base=SEARCH_BASE,
         search_filter=FILTER,
@@ -97,7 +90,6 @@ try:
     if conn.entries:
         print("USUARIO ENCONTRADO:")
         for entry in conn.entries:
-            # DN viene en entry.entry_dn
             print(f"  DN: {entry.entry_dn}")
             print(f"  Username: {entry.sAMAccountName.value}")
             print(f"  Nombre: {entry.givenName.value if entry.givenName else 'N/A'}")
@@ -110,11 +102,11 @@ try:
     else:
         print("NO SE ENCONTRÓ EL USUARIO")
         print("Posibles causas:")
-        print("  - sAMAccountName incorrecto")
+        print("  - sAMAccountName incorrecto (verifica en dsa.msc → pestaña Cuenta)")
         print("  - Usuario no existe")
-        print("  - Filtro mal escrito")
+        print("  - No está en DC=IFTS,DC=local")
 
     conn.unbind()
 
 except Exception as e:
-    print(f"ERROR: {e}")
+    print(f"ERROR EN BÚSQUEDA: {e}")
