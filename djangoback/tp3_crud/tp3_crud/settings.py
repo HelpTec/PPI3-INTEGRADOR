@@ -12,8 +12,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 import os
+from decouple import config
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
@@ -146,39 +146,48 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Configuración del servidor LDAP/AD
-LDAP_AUTH_URL = os.getenv('LDAP_AUTH_URL', 'ldap://tu-servidor-ad.dominio.local:389')
+LDAP_AUTH_URL = config('LDAP_AUTH_URL')
 
 # Si usas SSL/TLS (recomendado), usa ldaps:// y puerto 636
 # LDAP_AUTH_URL = os.getenv('LDAP_AUTH_URL', 'ldaps://tu-servidor-ad.dominio.local:636')
 
 # Usar conexión TLS para seguridad
-LDAP_AUTH_USE_TLS = False  # Cambiar a True si el servidor lo soporta
+LDAP_AUTH_USE_TLS = config('LDAP_AUTH_USE_TLS', cast=bool, default=False)
 
 # Usuario de búsqueda (bind user) - necesario para buscar usuarios en AD
-LDAP_AUTH_CONNECTION_USERNAME = os.getenv('LDAP_AUTH_CONNECTION_USERNAME', 'CN=bind_user,CN=Users,DC=dominio,DC=local')
-LDAP_AUTH_CONNECTION_PASSWORD = os.getenv('LDAP_AUTH_CONNECTION_PASSWORD', 'password_del_bind_user')
-
+LDAP_AUTH_CONNECTION_USERNAME = os.getenv('LDAP_AUTH_CONNECTION_USERNAME')
+LDAP_AUTH_CONNECTION_PASSWORD = os.getenv('LDAP_AUTH_CONNECTION_PASSWORD')
 # Base DN donde buscar usuarios
-LDAP_AUTH_SEARCH_BASE = os.getenv('LDAP_AUTH_SEARCH_BASE', 'CN=Users,DC=dominio,DC=local')
-
+LDAP_AUTH_SEARCH_BASE = config('LDAP_AUTH_SEARCH_BASE', default="DC=IFTS,DC=local")
 # Filtro para buscar usuarios - Para AD usa sAMAccountName
-LDAP_AUTH_USER_LOOKUP_FIELDS = ('username',)
+LDAP_AUTH_USER_SEARCH_FILTER = "(sAMAccountName=%(user)s)"
 LDAP_AUTH_USER_FIELDS = {
-    'username': 'sAMAccountName',
-    'first_name': 'givenName',
-    'last_name': 'sn',
-    'email': 'mail',
+    "username": "sAMAccountName",
+    "first_name": "givenName",
+    "last_name": "sn",
+    "email": "mail",
 }
 
 # Formato del DN del usuario
-LDAP_AUTH_OBJECT_CLASS = 'user'
+LDAP_AUTH_OBJECT_CLASSES = ["user", "person", "organizationalPerson", "top"]
+
+# Sincronización automática
+LDAP_AUTH_SYNC_USER = False
+LDAP_AUTH_CLEAN_USER = False
 
 # Sincronización de usuarios
 LDAP_AUTH_SYNC_USER_RELATIONS = None
 
 # Formato de búsqueda de usuarios
-LDAP_AUTH_FORMAT_SEARCH_FILTERS = 'ldap_sync.active_directory.search_filters'
+# LDAP_AUTH_FORMAT_SEARCH_FILTERS = 'ldap_sync.active_directory.search_filters'
 LDAP_AUTH_FORMAT_USERNAME = 'django_python3_ldap.utils.format_username_active_directory'
 
 # Limpieza del nombre de usuario
 LDAP_AUTH_CLEAN_USER_DATA = 'django_python3_ldap.utils.clean_user_data'
+
+LDAP_AUTH_CONNECTION_OPTIONS = {
+    "OPT_REFERRALS": 0,
+    "OPT_NETWORK_TIMEOUT": 10
+}
+AUTH_LDAP_CACHE_TIMEOUT = 0
+
