@@ -50,7 +50,6 @@ DJANGO_APPS = [
 
 LOCAL_APPS = [
     'apps.juego',
-    'django_python3_ldap',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
@@ -139,55 +138,46 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Configuración de autenticación LDAP para Active Directory
+# ==============================================================================
+# Configuración de autenticación LDAP con ldap3 puro
+# ==============================================================================
+
 AUTHENTICATION_BACKENDS = [
-    'django_python3_ldap.auth.LDAPBackend',
+    'apps.juego.ldap_backend.LDAP3Backend',  # Backend personalizado con ldap3 puro
     'django.contrib.auth.backends.ModelBackend',  # Fallback a autenticación local
 ]
 
 # Configuración del servidor LDAP/AD
 LDAP_AUTH_URL = config('LDAP_AUTH_URL')
 
-# Si usas SSL/TLS (recomendado), usa ldaps:// y puerto 636
-# LDAP_AUTH_URL = os.getenv('LDAP_AUTH_URL', 'ldaps://tu-servidor-ad.dominio.local:636')
-
-# Usar conexión TLS para seguridad
+# Usar conexión TLS/SSL para seguridad
 LDAP_AUTH_USE_TLS = config('LDAP_AUTH_USE_TLS', cast=bool, default=False)
 
 # Usuario de búsqueda (bind user) - necesario para buscar usuarios en AD
 LDAP_AUTH_CONNECTION_USERNAME = os.getenv('LDAP_AUTH_CONNECTION_USERNAME')
 LDAP_AUTH_CONNECTION_PASSWORD = os.getenv('LDAP_AUTH_CONNECTION_PASSWORD')
+
 # Base DN donde buscar usuarios
 LDAP_AUTH_SEARCH_BASE = config('LDAP_AUTH_SEARCH_BASE', default="DC=IFTS,DC=local")
-# Filtro para buscar usuarios - Para AD usa sAMAccountName
-LDAP_AUTH_USER_SEARCH_FILTER = "(sAMAccountName=%(user)s)"
-LDAP_AUTH_USER_FIELDS = {
-    "username": "sAMAccountName",
-    "first_name": "givenName",
-    "last_name": "sn",
-    "email": "mail",
+
+# Logging para LDAP (útil para debugging)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'apps.juego.ldap_utils': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'apps.juego.ldap_backend': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
 }
-
-# Formato del DN del usuario
-LDAP_AUTH_OBJECT_CLASSES = ["user", "person", "organizationalPerson", "top"]
-
-# Sincronización automática
-LDAP_AUTH_SYNC_USER = False
-LDAP_AUTH_CLEAN_USER = False
-
-# Sincronización de usuarios
-LDAP_AUTH_SYNC_USER_RELATIONS = None
-
-# Formato de búsqueda de usuarios
-# LDAP_AUTH_FORMAT_SEARCH_FILTERS = 'ldap_sync.active_directory.search_filters'
-LDAP_AUTH_FORMAT_USERNAME = 'django_python3_ldap.utils.format_username_active_directory'
-
-# Limpieza del nombre de usuario
-LDAP_AUTH_CLEAN_USER_DATA = 'django_python3_ldap.utils.clean_user_data'
-
-LDAP_AUTH_CONNECTION_OPTIONS = {
-    "OPT_REFERRALS": 0,
-    "OPT_NETWORK_TIMEOUT": 10
-}
-AUTH_LDAP_CACHE_TIMEOUT = 0
 

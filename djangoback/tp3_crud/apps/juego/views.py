@@ -198,17 +198,30 @@ class DecadaView(TemplateView):
 
 
 def LoginAuth(request):
+    """
+    Vista de login que usa el backend LDAP3 personalizado
+    """
     if request.method == "POST":
-        username = request.POST["username"]
-        password = request.POST["password"]
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "")
 
+        # Validar que se proporcionaron ambos campos
+        if not username or not password:
+            messages.error(request, "Por favor ingrese usuario y contraseña")
+            return render(request, "login.html")
+
+        # Intentar autenticar con LDAP
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
             login(request, user)
+            messages.success(request, f"Bienvenido {user.first_name or user.username}!")
             return redirect("home")
         else:
-            messages.error(request, "Usuario o Contraseña incorrectos")
+            messages.error(
+                request,
+                "Usuario o contraseña incorrectos. Verifique sus credenciales."
+            )
 
     return render(request, "login.html")
 
