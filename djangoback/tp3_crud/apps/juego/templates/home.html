@@ -6,6 +6,7 @@
 
 </style>
 <main>
+  {% if user.is_authenticated %}
       <div id="games-container" class="cards-container">
         {% for juego in page_obj %}
         <div class="card">
@@ -33,6 +34,7 @@
           <a href="?page={{ page_obj.paginator.num_pages }}">Última</a>
         {% endif %}
       </div>
+      {% endif %}
 </main>
     
 {% endblock %}

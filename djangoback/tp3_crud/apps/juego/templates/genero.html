@@ -1,5 +1,6 @@
 {% extends "base.html" %} {% block page_content %} {% load static %}
 <body>
+  {% if user.is_authenticated %}
   <div class="container">
     <h1>Géneros</h1>
             <p>Seleccioná un género para ver los juegos.</p>
@@ -155,6 +156,7 @@
           <a href="?genero={{ genero_actual }}&page={{ page_obj.paginator.num_pages }}">Última</a>
         {% endif %}
       </div>
+    {% endif %}
     {% endif %}
   </main>
   <script>
