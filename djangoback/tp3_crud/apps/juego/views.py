@@ -199,7 +199,7 @@ class DecadaView(TemplateView):
 
 def LoginAuth(request):
     """
-    Vista de login que usa el backend LDAP3 personalizado
+    Vista de login estándar usando autenticación de Django.
     """
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
@@ -210,7 +210,7 @@ def LoginAuth(request):
             messages.error(request, "Por favor ingrese usuario y contraseña")
             return render(request, "login.html")
 
-        # Intentar autenticar con LDAP
+        # Intentar autenticar con Django
         user = authenticate(request, username=username, password=password)
 
         if user is not None:

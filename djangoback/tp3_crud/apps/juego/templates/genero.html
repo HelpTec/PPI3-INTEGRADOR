@@ -1,6 +1,6 @@
 {% extends "base.html" %} {% block page_content %} {% load static %}
 <body>
-  {% if user.is_authenticated %}
+ 
   <div class="container">
     <h1>Géneros</h1>
             <p>Seleccioná un género para ver los juegos.</p>
@@ -157,7 +157,7 @@
         {% endif %}
       </div>
     {% endif %}
-    {% endif %}
+  
   </main>
   <script>
     const genreButtons = document.querySelectorAll(".genre-button"); // <-- importante
