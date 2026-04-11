@@ -343,14 +343,14 @@
             <span><i class="bi bi-cpu-fill me-2"></i> Asistente de Juegos</span>
             <button class="chat-close-btn" id="closeChatBtn">&times;</button>
         </div>
-        <div class="chat-body">
+        <div class="chat-body" id="chatBody">
             <div class="chat-message">
                 Spawnée para ayudarte! Decime qué misión tenemos hoy,..ni el jefe final más difícil tiene secretos para mí! tirame un whisper y lo resolvemos en cooperativo.
             </div>
         </div>
         <div class="chat-footer">
-            <input type="text" placeholder="Escribe un mensaje...">
-            <button><i class="bi bi-send-fill"></i></button>
+            <input type="text" id="chatInput" placeholder="Escribe un mensaje...">
+            <button id="chatSendBtn"><i class="bi bi-send-fill"></i></button>
         </div>
     </div>
 
@@ -364,6 +364,9 @@
             var joystickBtn = document.getElementById('joystickBtn');
             var chatPopup = document.getElementById('chatPopup');
             var closeChatBtn = document.getElementById('closeChatBtn');
+            var chatInput = document.getElementById('chatInput');
+            var chatSendBtn = document.getElementById('chatSendBtn');
+            var chatBody = document.getElementById('chatBody');
 
             // Abrir y cerrar con el joystick
             joystickBtn.addEventListener('click', function() {
@@ -373,6 +376,82 @@
             // Cerrar con la X
             closeChatBtn.addEventListener('click', function() {
                 chatPopup.classList.remove('show');
+            });
+
+            // Lógica para enviar mensajes
+            function sendMessage() {
+                var message = chatInput.value.trim();
+                if (message === '') return;
+
+                // Añadir mensaje del usuario al chat
+                appendMessage(message, '#e9ecef', '#333', 'flex-end');
+                chatInput.value = '';
+
+                // Añadir mensaje de "escribiendo..."
+                var typingId = 'typing-' + Date.now();
+                appendMessage('...', '#f1f1f1', '#666', 'flex-start', typingId);
+
+                // Enviar al backend Django que conecta con Gemini
+                fetch('/api/chat/', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message }) // Send stringified JSON data
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remover mensaje de "escribiendo..."
+                    var typingElement = document.getElementById(typingId);
+                    if (typingElement) typingElement.remove();
+
+                    // Añadir la respuesta de la IA
+                    appendMessage(data.reply, '#1DB954', 'white', 'flex-start');
+                })
+                .catch(error => {
+                    var typingElement = document.getElementById(typingId);
+                    if (typingElement) typingElement.remove();
+                    appendMessage('Error de conexión con la IA.', '#ffcece', '#333', 'flex-start');
+                    console.error('Error:', error);
+                });
+            }
+
+            function appendMessage(text, bgColor, color, align, id = null) {
+                var msgDiv = document.createElement('div');
+                msgDiv.className = 'chat-message';
+                msgDiv.style.backgroundColor = bgColor;
+                msgDiv.style.color = color;
+                msgDiv.style.alignSelf = align;
+                if (align === 'flex-end') {
+                    msgDiv.style.marginLeft = 'auto';
+                    msgDiv.style.borderBottomLeftRadius = '15px';
+                    msgDiv.style.borderBottomRightRadius = '0';
+                } else {
+                    msgDiv.style.borderBottomLeftRadius = '0';
+                    msgDiv.style.borderBottomRightRadius = '15px';
+                }
+                
+                if (id) msgDiv.id = id;
+                // Para interpretar HTML u texto crudo
+                msgDiv.innerText = text;
+
+                // Envolver el mensaje en un div para alinear correctamente usando flex
+                var wrapper = document.createElement('div');
+                wrapper.style.display = 'flex';
+                wrapper.style.flexDirection = 'column';
+                wrapper.style.width = '100%';
+                wrapper.appendChild(msgDiv);
+
+                chatBody.appendChild(wrapper);
+                chatBody.scrollTop = chatBody.scrollHeight; // Auto-scroll
+            }
+
+            chatSendBtn.addEventListener('click', sendMessage);
+            
+            chatInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
             });
         });
     </script>

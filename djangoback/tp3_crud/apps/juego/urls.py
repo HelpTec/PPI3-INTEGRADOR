@@ -11,4 +11,5 @@ urlpatterns = [
     path("decada", views.DecadaView.as_view(), name="decada"),
     path('juego/<int:juego_id>/', views.detalle_juego, name='detalle_juego'),
     path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
+    path("api/chat/", views.api_chat_bot, name="api_chat_bot"),
 ]
