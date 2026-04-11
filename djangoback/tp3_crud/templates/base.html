@@ -93,6 +93,140 @@
             color: #fff; /* Match dropdown-item hover text color for dark dropdown */
             background-color: #3e3e3e; /* Match dropdown-menu-dark hover background */
         }
+
+        /* Estilos para el joystick flotante */
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .floating-joystick {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            font-size: 4.7rem;
+            color: #1DB954;
+            animation: float 3s ease-in-out infinite;
+            z-index: 9999;
+            cursor: pointer;
+            filter: drop-shadow(0px 8px 10px rgba(0, 0, 0, 0.4));
+            transition: color 0.3s ease, transform 0.3s ease;
+        }
+
+        .floating-joystick:hover {
+            color: #1ed760;
+            transform: scale(1.1);
+        }
+
+        /* Estilos para el chat popup */
+        .chat-popup {
+            display: none;
+            position: fixed;
+            bottom: 120px;
+            right: 30px;
+            width: 380px; /* Aprox 10cm */
+            height: 570px; /* Aprox 15cm */
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            z-index: 10000;
+            flex-direction: column;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease;
+            border: 1px solid #ddd;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chat-popup.show {
+            display: flex;
+            opacity: 1;
+        }
+
+        .chat-header {
+            background-color: #1DB954;
+            color: white;
+            padding: 15px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+
+        .chat-close-btn {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.8rem;
+            cursor: pointer;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .chat-body {
+            flex-grow: 1;
+            padding: 15px;
+            overflow-y: auto;
+            background-color: #f4f6f8;
+        }
+
+        .chat-message {
+            background-color: #e9ecef;
+            padding: 10px 15px;
+            border-radius: 15px;
+            border-bottom-left-radius: 0;
+            margin-bottom: 15px;
+            display: inline-block;
+            max-width: 85%;
+            color: #333;
+            font-size: 0.95rem;
+        }
+
+        .chat-footer {
+            padding: 15px;
+            background-color: white;
+            border-top: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+        }
+
+        .chat-footer input {
+            flex-grow: 1;
+            border: 1px solid #ccc;
+            border-radius: 20px;
+            padding: 10px 15px;
+            margin-right: 10px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .chat-footer input:focus {
+            border-color: #1DB954;
+        }
+
+        .chat-footer button {
+            background-color: #1DB954;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 42px;
+            height: 42px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            transition: background-color 0.2s;
+        }
+
+        .chat-footer button:hover {
+            background-color: #1ed760;
+        }
     </style>
 </head>
 <body>
@@ -202,5 +336,45 @@
   </div>
 </footer>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <!-- Chat Popup -->
+    <div class="chat-popup" id="chatPopup">
+        <div class="chat-header">
+            <span><i class="bi bi-cpu-fill me-2"></i> Asistente de Juegos</span>
+            <button class="chat-close-btn" id="closeChatBtn">&times;</button>
+        </div>
+        <div class="chat-body">
+            <div class="chat-message">
+                Spawnée para ayudarte! Decime qué misión tenemos hoy,..ni el jefe final más difícil tiene secretos para mí! tirame un whisper y lo resolvemos en cooperativo.
+            </div>
+        </div>
+        <div class="chat-footer">
+            <input type="text" placeholder="Escribe un mensaje...">
+            <button><i class="bi bi-send-fill"></i></button>
+        </div>
+    </div>
+
+    <!-- Joystick flotante -->
+    <div class="floating-joystick" title="GameBase" id="joystickBtn">
+        <i class="bi bi-controller"></i>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            var joystickBtn = document.getElementById('joystickBtn');
+            var chatPopup = document.getElementById('chatPopup');
+            var closeChatBtn = document.getElementById('closeChatBtn');
+
+            // Abrir y cerrar con el joystick
+            joystickBtn.addEventListener('click', function() {
+                chatPopup.classList.toggle('show');
+            });
+
+            // Cerrar con la X
+            closeChatBtn.addEventListener('click', function() {
+                chatPopup.classList.remove('show');
+            });
+        });
+    </script>
 </body>
 </html>
