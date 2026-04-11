@@ -260,7 +260,7 @@ def api_chat_bot(request):
             
             genai.configure(api_key=api_key)
             
-            model = genai.GenerativeModel("gemini-1.5-flash")
+            model = genai.GenerativeModel("gemini-2.0-flash")
             prompt = (
                 "Eres un asistente virtual de una página web sobre videojuegos llamada GameBase. "
                 "Responde de forma amistosa, útil y concisa al siguiente mensaje del usuario:\n\n"
