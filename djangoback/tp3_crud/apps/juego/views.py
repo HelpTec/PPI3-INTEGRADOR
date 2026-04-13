@@ -41,6 +41,13 @@ class JuegoView(TemplateView):
 # In apps/juego/views.py
 
 # ... (other code) ...
+class Emujs(TemplateView):
+    name = "emujs"
+    template_name = "emujs.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        return context
 
 
 def detalle_juego(request, juego_id):
