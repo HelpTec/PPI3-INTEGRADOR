@@ -3,3 +3,6 @@ django-bootstrap5
 python-decouple
 python-dotenv
 ldap3>=2.9.1
+django-allauth
+PyJWT
+cryptography
