@@ -6,7 +6,11 @@ from django.contrib.auth.forms import UserCreationForm
 from apps.juego.models import Juego
 from django.core.paginator import Paginator
 from .igdb_api import get_game_data_by_name
-import json 
+import json
+import os
+import google.generativeai as genai
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 class JuegoView(TemplateView):
     name = "home"
@@ -238,3 +242,35 @@ def register_view(request):
     else:
         form = UserCreationForm()
     return render(request, "register.html", {"form": form})
+
+
+@csrf_exempt
+def api_chat_bot(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            user_message = data.get('message', '')
+            
+            if not user_message:
+                return JsonResponse({'reply': 'Mensaje vacío.'}, status=400)
+                
+            api_key = os.environ.get("GEMINI_API_KEY")
+            if not api_key or api_key == "TU_CLAVE_DE_GEMINI_AQUI":
+                return JsonResponse({'reply': 'La clave de API de Gemini no está configurada.'}, status=500)
+            
+            genai.configure(api_key=api_key)
+            
+            model = genai.GenerativeModel("gemini-2.5-flash")
+            prompt = (
+                "Eres un asistente virtual de una página web sobre videojuegos llamada GameBase. "
+                "Responde de forma amistosa, útil y concisa al siguiente mensaje del usuario:\n\n"
+                f"Usuario: {user_message}"
+            )
+            
+            response = model.generate_content(prompt)
+            
+            return JsonResponse({'reply': response.text})
+        except Exception as e:
+            return JsonResponse({'reply': f'Hubo un error de IA: {str(e)}'}, status=500)
+    
+    return JsonResponse({'reply': 'Método no permitido.'}, status=405)
