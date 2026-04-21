@@ -34,7 +34,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGOUT_REDIRECT_URL = '/home/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL = '/'
 # Application definition
 
 DJANGO_APPS = [
@@ -44,15 +45,24 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django_bootstrap5'
+    'django.contrib.sites',
+    'django_bootstrap5',
+]
 
+THIRD_PARTY_APPS = [
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'allauth.socialaccount.providers.google',
 ]
 
 LOCAL_APPS = [
     'apps.juego',
 ]
 
-INSTALLED_APPS = DJANGO_APPS + LOCAL_APPS
+INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
+
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -62,6 +72,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'tp3_crud.urls'
@@ -139,6 +150,61 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
+    'apps.juego.ldap_backend.LDAP3Backend',  # Backend personalizado con ldap3 puro
+    'django.contrib.auth.backends.ModelBackend',  # Fallback a autenticación local
+    'allauth.account.auth_backends.AuthenticationBackend',  # Google OAuth
 ]
+
+# Configuración del servidor LDAP/AD
+LDAP_AUTH_URL = config('LDAP_AUTH_URL')
+
+# Usar conexión TLS/SSL para seguridad
+LDAP_AUTH_USE_TLS = config('LDAP_AUTH_USE_TLS', cast=bool, default=False)
+
+# Usuario de búsqueda (bind user) - necesario para buscar usuarios en AD
+LDAP_AUTH_CONNECTION_USERNAME = os.getenv('LDAP_AUTH_CONNECTION_USERNAME')
+LDAP_AUTH_CONNECTION_PASSWORD = os.getenv('LDAP_AUTH_CONNECTION_PASSWORD')
+
+# Base DN donde buscar usuarios
+LDAP_AUTH_SEARCH_BASE = config('LDAP_AUTH_SEARCH_BASE', default="DC=IFTS,DC=local")
+
+# Logging para LDAP (útil para debugging)
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'loggers': {
+        'apps.juego.ldap_utils': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+        'apps.juego.ldap_backend': {
+            'handlers': ['console'],
+            'level': 'INFO',
+        },
+    },
+}
+
+# ==============================================================================
+# Configuración de Google OAuth (django-allauth)
+# ==============================================================================
+
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+SOCIALACCOUNT_LOGIN_ON_GET = True
+
+SOCIALACCOUNT_PROVIDERS = {
+    'google': {
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
+        'APP': {
+            'client_id': config('GOOGLE_CLIENT_ID', default=''),
+            'secret': config('GOOGLE_CLIENT_SECRET', default=''),
+            'key': '',
+        }
+    }
+}
 
