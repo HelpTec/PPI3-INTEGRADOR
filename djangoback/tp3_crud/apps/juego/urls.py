@@ -12,4 +12,5 @@ urlpatterns = [
     path('juego/<int:juego_id>/', views.detalle_juego, name='detalle_juego'),
     path("logout/", LogoutView.as_view(next_page="login"), name="logout"),
     path("api/chat/", views.api_chat_bot, name="api_chat_bot"),
+    path("emujs/", views.Emujs.as_view(), name="emujs"),
 ]

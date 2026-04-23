@@ -1,0 +1,186 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block extra_head %}
+<style>
+    .card-game {
+        min-height: 140px;
+    }
+
+    .game-selection-title {
+        margin-bottom: 1rem;
+    }
+
+    .card-game img {
+        width: 100%;
+        height: 100px;
+        object-fit: contain;
+    }
+
+    .container {
+        height: 100%;
+        max-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    #emulator-panel {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        min-height: 0; /* Allow flex item to shrink */
+    }
+
+    #game {
+        flex: 1;
+        width: 100%;
+        display: block;
+        min-height: 0; /* Allow flex item to shrink */
+    }
+</style>
+{% endblock %}
+
+{% block page_content %}
+<div class="container py-4">
+    <div id="game-selection" class="mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="game-selection-title">Elegí un juego</h2>
+            </div>
+        </div>
+
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+                <div class="col">
+                    <div class="card card-game h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <img src="https://img.itch.zone/aW1nLzExMDM0ODk4LnBuZw==/original/XB0rbn.png" alt="Pentablocat">
+                            <h5 class="card-title">Pentablocat</h5>
+                            <p class="card-text mb-3">
+                                <strong>Género:</strong> Puzzle <br>
+                                <strong>Plataforma:</strong> NES <br>
+                            </p>
+                            <button type="button" class="btn btn-primary mt-auto load-game-btn"
+                                data-game-name="{{ juego.Name|escapejs }}"
+                                data-rom-url="{% static 'emulatorjs/roms/pentablocat.nes' %}">
+                                Jugar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                                <div class="col">
+                    <div class="card card-game h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <img src="https://www.retrones.net/sites/default/files/capturas/BladeBuster%20201409210915237.png" alt="BladeBuster">
+                            <h5 class="card-title">BladeBuster</h5>
+                            <p class="card-text mb-3">
+                                <strong>Género:</strong> Acción <br>
+                                <strong>Plataforma:</strong> NES <br>
+                            </p>
+                            <button type="button" class="btn btn-primary mt-auto load-game-btn"
+                                data-game-name="{{ juego.Name|escapejs }}"
+                                data-rom-url="{% static 'emulatorjs/roms/BladeBuster.nes' %}">
+                                Jugar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                                <div class="col">
+                    <div class="card card-game h-100 shadow-sm">
+                        <div class="card-body d-flex flex-column">
+                            <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ba7bee9d-0965-409c-a653-9490f8941cd7/dhnjw47-c6248122-e67e-4f6b-a4fd-369e852754bb.png/v1/fit/w_828,h_1160/desert_escape__by_hjrodrigo_dhnjw47-414w-2x.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTc5MyIsInBhdGgiOiIvZi9iYTdiZWU5ZC0wOTY1LTQwOWMtYTY1My05NDkwZjg5NDFjZDcvZGhuanc0Ny1jNjI0ODEyMi1lNjdlLTRmNmItYTRmZC0zNjllODUyNzU0YmIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.UcdHcZU_gbhlJD0OikK7rKGzm3gUuL4vYj-j7ZPQ2ec" alt="DesertEscape">
+                            <h5 class="card-title">Desert Escape!</h5>
+                            <p class="card-text mb-3">
+                                <strong>Género:</strong> Acción/Puzzle <br>
+                                <strong>Plataforma:</strong> NES <br>
+                            </p>
+                            <button type="button" class="btn btn-primary mt-auto load-game-btn"
+                                data-game-name="{{ juego.Name|escapejs }}"
+                                data-rom-url="{% static 'emulatorjs/roms/Desert Escape! v1.1.nes' %}">
+                                Jugar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+        </div>
+    </div>
+
+    <div id="emulator-panel" class="d-none">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 id="selected-game-name">Juego seleccionado</h2>
+                <p class="text-muted mb-0">Usa el botón para volver a la selección de juegos.</p>
+            </div>
+            <button id="back-to-selection" class="btn btn-secondary">Volver a selección</button>
+        </div>
+
+        <div id="game" class="border rounded overflow-hidden"></div>
+    </div>
+</div>
+
+<script>
+    const emulatorLoaderUrl = "https://cdn.emulatorjs.org/stable/data/loader.js";
+    let currentEmulatorScript = null;
+    let emulatorLoaded = false;
+
+    const loadEmulator = (romUrl, title) => {
+        document.getElementById("selected-game-name").textContent = title;
+        document.getElementById("game-selection").classList.add("d-none");
+        document.getElementById("emulator-panel").classList.remove("d-none");
+
+        const gameContainer = document.getElementById("game");
+        gameContainer.innerHTML = "";
+
+        if (currentEmulatorScript) {
+            currentEmulatorScript.remove();
+            currentEmulatorScript = null;
+        }
+
+        window.EJS_player = "#game";
+        window.EJS_core = "nes";
+        window.EJS_pathtodata = "https://cdn.emulatorjs.org/stable/data/";
+        window.EJS_gameUrl = romUrl;
+
+        currentEmulatorScript = document.createElement("script");
+        currentEmulatorScript.src = emulatorLoaderUrl;
+        currentEmulatorScript.onload = () => {
+            emulatorLoaded = true;
+        };
+        currentEmulatorScript.onerror = () => {
+            alert("No se pudo cargar el emulador. Intentá de nuevo más tarde.");
+        };
+        document.body.appendChild(currentEmulatorScript);
+    };
+
+    const resetToSelection = () => {
+        document.getElementById("emulator-panel").classList.add("d-none");
+        document.getElementById("game-selection").classList.remove("d-none");
+
+        if (window.EJS_stop) { window.EJS_stop(); }
+
+        document.getElementById("game").innerHTML = "";
+
+        if (currentEmulatorScript) {
+            currentEmulatorScript.remove();
+            currentEmulatorScript = null;
+        }
+
+        window.EJS_player = undefined;
+        window.EJS_core = undefined;
+        window.EJS_pathtodata = undefined;
+        window.EJS_gameUrl = undefined;
+        emulatorLoaded = false;
+    };
+
+    document.querySelectorAll(".load-game-btn").forEach((button) => {
+        button.addEventListener("click", () => {
+            const romUrl = button.dataset.romUrl;
+            const title = button.dataset.gameName;
+            loadEmulator(romUrl, title);
+        });
+    });
+
+    document.getElementById("back-to-selection").addEventListener("click", () => {
+        window.location.reload();
+    });
+</script>
+{% endblock %}

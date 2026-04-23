@@ -149,10 +149,6 @@ STATICFILES_DIRS = [BASE_DIR / "static"]
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# ==============================================================================
-# Configuración de autenticación LDAP con ldap3 puro
-# ==============================================================================
-
 AUTHENTICATION_BACKENDS = [
     'apps.juego.ldap_backend.LDAP3Backend',  # Backend personalizado con ldap3 puro
     'django.contrib.auth.backends.ModelBackend',  # Fallback a autenticación local

@@ -45,6 +45,14 @@ class JuegoView(TemplateView):
 # In apps/juego/views.py
 
 # ... (other code) ...
+class Emujs(TemplateView):
+    name = "emujs"
+    template_name = "emujs.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["juegos"] = Juego.objects.all()
+        return context
 
 
 def detalle_juego(request, juego_id):
@@ -203,7 +211,7 @@ class DecadaView(TemplateView):
 
 def LoginAuth(request):
     """
-    Vista de login que usa el backend LDAP3 personalizado
+    Vista de login estándar usando autenticación de Django.
     """
     if request.method == "POST":
         username = request.POST.get("username", "").strip()
@@ -214,7 +222,7 @@ def LoginAuth(request):
             messages.error(request, "Por favor ingrese usuario y contraseña")
             return render(request, "login.html")
 
-        # Intentar autenticar con LDAP
+        # Intentar autenticar con Django
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
