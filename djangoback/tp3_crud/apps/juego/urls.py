@@ -3,7 +3,9 @@ from django.contrib.auth.views import LogoutView
 from . import views
 
 urlpatterns = [
-    path("", views.JuegoView.as_view(), name="home"),
+    path("", views.gamebase_view, name="home"),
+    path("api/juegos/", views.api_juegos, name="api_juegos"),
+    path("api/igdb-ficha/", views.api_igdb_ficha, name="api_igdb_ficha"),
     path("login", views.LoginAuth, name="login"),
     path("register", views.register_view, name="register"),
     path("genero", views.GeneroView.as_view(), name="genero"),
