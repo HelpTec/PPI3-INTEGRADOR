@@ -34,8 +34,9 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-LOGOUT_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
+LOGIN_URL = '/login'
 # Application definition
 
 DJANGO_APPS = [
@@ -129,7 +130,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es'
 
 TIME_ZONE = 'UTC'
 

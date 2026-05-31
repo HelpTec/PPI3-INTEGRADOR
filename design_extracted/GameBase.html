@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameBase</title>
+<link rel="stylesheet" href="gb-hifi.css">
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="gb-data.js"></script>
+
+<script type="text/babel" data-presets="react">
+const { useState, useEffect, useRef, useCallback } = React;
+
+/* ---------- icons ---------- */
+const PadIcon = (p) => (
+  <svg viewBox="0 0 60 60" fill="none" {...p}>
+    <rect x="32.5" y="35" width="5" height="5" rx="1" fill="currentColor"/>
+    <rect x="17.5" y="27.5" width="5" height="15" rx="1" fill="currentColor"/>
+    <rect x="27.5" y="32.5" width="5" height="15" rx="1" transform="rotate(90 27.5 32.5)" fill="currentColor"/>
+    <rect x="40" y="30" width="5" height="5" rx="1" fill="currentColor"/>
+    <path d="M35 20V18.12C35 16.62 35 15.87 34.58 15.33C34.15 14.79 33.43 14.61 31.97 14.24L28.03 13.26C26.57 12.89 25.85 12.71 25.42 12.17C25 11.63 25 10.88 25 9.38V5" stroke="currentColor" strokeWidth="4" strokeLinecap="round"/>
+    <path d="M7.5 35C7.5 28.6 7.5 25.4 9.05 23.2C9.45 22.63 9.91 22.13 10.43 21.69C12.45 20 15.39 20 21.25 20H38.75C44.61 20 47.55 20 49.57 21.69C50.09 22.13 50.55 22.63 50.95 23.2C52.5 25.4 52.5 28.6 52.5 35C52.5 41.4 52.5 44.6 50.95 46.8C50.55 47.37 50.09 47.87 49.57 48.31C47.55 50 44.61 50 38.75 50H21.25C15.39 50 12.45 50 10.43 48.31C9.91 47.87 9.45 47.37 9.05 46.8C7.5 44.6 7.5 41.4 7.5 35Z" stroke="currentColor" strokeWidth="4"/>
+  </svg>
+);
+const SearchIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none"><circle cx="10.5" cy="10.5" r="6.5" stroke="currentColor" strokeWidth="2.4"/><path d="M20 20l-4.5-4.5" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/></svg>
+);
+
+/* ---------- cover art generator ---------- */
+function coverBg(g){
+  return `repeating-linear-gradient(0deg, rgba(0,0,0,.10) 0 3px, transparent 3px 6px),`
+    + `repeating-linear-gradient(90deg, rgba(0,0,0,.07) 0 3px, transparent 3px 6px),`
+    + `linear-gradient(180deg, ${g.sky} 0%, ${g.sky} 54%, ${g.ground} 54%, ${g.ground} 100%)`;
+}
+function shotBg(g,i){
+  const split=[44,62,72][i%3];
+  const a=i%2 ? g.ground : g.sky, b=i%2 ? g.sky : g.ground;
+  return `repeating-linear-gradient(0deg, rgba(0,0,0,.12) 0 3px, transparent 3px 6px),`
+    + `linear-gradient(180deg, ${a} 0%, ${a} ${split}%, ${b} ${split}%, ${b} 100%)`;
+}
+
+/* =========================================================
+   TOP BAR
+   ========================================================= */
+function TopBar({query,setQuery,onHome,count}){
+  return (
+    <div className="topbar">
+      <div className="tb-brand" onClick={onHome} title="Inicio">
+        <PadIcon style={{width:30,height:30}}/>
+        <span className="nm">GAME<b>BASE</b></span>
+      </div>
+      <label className="search">
+        <SearchIcon/>
+        <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Buscar juego o consola…"/>
+        <kbd>/</kbd>
+      </label>
+      <div className="tb-right">
+        <span className="tb-count">{count} juegos · hasta 2012</span>
+        <div className="avatar">P1</div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   GAME CARD
+   ========================================================= */
+function Card({g,onOpen,fav,toggleFav}){
+  return (
+    <button className="card" onClick={()=>onOpen(g.id)}>
+      <div className="cover" style={{background:coverBg(g)}}>
+        <span className="con-tag">{g.con}</span>
+        <span className={"fav"+(fav?" on":"")} onClick={(e)=>{e.stopPropagation();toggleFav(g.id);}}>{fav?"★":"☆"}</span>
+        <span className="mono">{g.mono}</span>
+        <span className="play-ov"><span className="pl">▶</span></span>
+      </div>
+      <div className="c-title">{g.title}</div>
+      <div className="c-meta">{g.year} · {g.genre}</div>
+    </button>
+  );
+}
+
+/* =========================================================
+   LIBRARY (direction B — shelves)
+   ========================================================= */
+function Library({query,filter,setFilter,onOpen,favs,toggleFav}){
+  const q=query.trim().toLowerCase();
+  const matches=(g)=> (g.title+" "+g.con+" "+g.genre).toLowerCase().includes(q);
+
+  if(q){
+    const res=GB_GAMES.filter(matches);
+    return (
+      <div className="scroll screen-anim">
+        <ChipBar filter={filter} setFilter={setFilter}/>
+        <div className="shelf">
+          <div className="shelf-head"><h3>Resultados <span className="badge">{res.length}</span></h3></div>
+          <div style={{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(154px,1fr))",gap:18,padding:"6px 22px 30px"}}>
+            {res.map(g=><Card key={g.id} g={g} onOpen={onOpen} fav={!!favs[g.id]} toggleFav={toggleFav}/>)}
+            {res.length===0 && <p style={{color:"var(--muted)",fontSize:20}}>Sin resultados para “{query}”.</p>}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const cons = filter==="all" ? GB_CONSOLES : [filter];
+  const labels={"NES":"DESTACADOS NES","SNES":"CLÁSICOS SNES","Genesis":"VELOCIDAD GENESIS","Game Boy":"PORTÁTILES GAME BOY","PS1":"GENERACIÓN PS1","Arcade":"SALÓN RECREATIVO"};
+  return (
+    <div className="scroll screen-anim">
+      <ChipBar filter={filter} setFilter={setFilter}/>
+      {cons.map(con=>{
+        const list=GB_GAMES.filter(g=>g.con===con);
+        if(!list.length) return null;
+        return (
+          <div className="shelf" key={con}>
+            <div className="shelf-head">
+              <h3>{labels[con]||con} <span className="badge">{list.length}</span></h3>
+              <a href="#" onClick={e=>{e.preventDefault();setFilter(con);}}>ver todo ›</a>
+            </div>
+            <div className="rail">
+              {list.map(g=><Card key={g.id} g={g} onOpen={onOpen} fav={!!favs[g.id]} toggleFav={toggleFav}/>)}
+            </div>
+          </div>
+        );
+      })}
+      <div style={{height:30}}/>
+    </div>
+  );
+}
+function ChipBar({filter,setFilter}){
+  return (
+    <div className="chipbar">
+      <button className={"chip"+(filter==="all"?" on":"")} onClick={()=>setFilter("all")}>Todas</button>
+      {GB_CONSOLES.map(c=><button key={c} className={"chip"+(filter===c?" on":"")} onClick={()=>setFilter(c)}>{c}</button>)}
+    </div>
+  );
+}
+
+/* =========================================================
+   FICHA (direction A — split)
+   ========================================================= */
+function Detail({g,onBack,onPlay,fav,toggleFav}){
+  return (
+    <>
+      <div className="subbar">
+        <button className="backbtn" onClick={onBack}>‹ Biblioteca</button>
+        <span className="crumb">{g.con} / {g.genre}</span>
+      </div>
+      <div className="scroll screen-anim">
+        <div className="detail">
+          <div className="detail-grid">
+            <div className="d-left">
+              <div className="d-cover" style={{background:coverBg(g)}}><span className="mono">{g.mono}</span></div>
+              <button className="btn-play" onClick={()=>onPlay(g.id)}>▶ JUGAR</button>
+              <button className={"btn-2"+(fav?" on":"")} onClick={()=>toggleFav(g.id)}>{fav?"★ En mi lista":"☆ Guardar"}</button>
+            </div>
+            <div>
+              <h1 className="d-title">{g.title}</h1>
+              <div className="metarow">
+                <span className="meta-chip"><b>{g.con}</b></span>
+                <span className="meta-chip">{g.year}</span>
+                <span className="meta-chip">{g.genre}</span>
+                <span className="meta-chip">{g.players} jug.</span>
+              </div>
+              <p className="d-desc">{g.desc}</p>
+
+              <div className="sec-h">CAPTURAS</div>
+              <div className="shots">
+                {[0,1,2].map(i=>(
+                  <div className="shot" key={i} style={{background:shotBg(g,i)}}>
+                    <span style={{position:"absolute",left:8,bottom:6,fontFamily:"var(--pixel-font)",fontSize:8,color:"rgba(12,18,8,.6)"}}>{g.mono}·{i+1}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="sec-h">FICHA TÉCNICA</div>
+              <div className="specs">
+                <div className="spec"><span>Desarrolladora</span><b>{g.dev}</b></div>
+                <div className="spec"><span>Editora</span><b>{g.pub}</b></div>
+                <div className="spec"><span>Lanzamiento</span><b>{g.year}</b></div>
+                <div className="spec"><span>Región</span><b>{g.region}</b></div>
+                <div className="spec"><span>Jugadores</span><b>{g.players}</b></div>
+                <div className="spec"><span>Emulación</span><b>Compatible ✓</b></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div className="mobile-playbar">
+          <button className="btn-play" onClick={()=>onPlay(g.id)}>▶ JUGAR</button>
+          <button className={"btn-fav"+(fav?" on":"")} onClick={()=>toggleFav(g.id)}>{fav?"★":"☆"}</button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* =========================================================
+   EMULADOR (direction A — console shell)
+   ========================================================= */
+function fmt(s){const m=Math.floor(s/60),x=s%60;return (m<10?"0":"")+m+":"+(x<10?"0":"")+x;}
+function spawnCoin(){return {id:Math.random(),x:10+Math.random()*78,y:14+Math.random()*64};}
+
+function Emulator({g,onExit}){
+  const [pos,setPos]=useState({x:50,y:55});
+  const [coins,setCoins]=useState(()=>[spawnCoin(),spawnCoin(),spawnCoin()]);
+  const [score,setScore]=useState(0);
+  const [time,setTime]=useState(0);
+  const [saves,setSaves]=useState([]);
+  const [pressed,setPressed]=useState(new Set());
+  const [flash,setFlash]=useState("");
+  const [aPulse,setAPulse]=useState(false);
+  const held=useRef(new Set());
+  const consoleRef=useRef(null);
+
+  const hold=useCallback((name,on)=>{
+    if(on)held.current.add(name);else held.current.delete(name);
+    setPressed(p=>{const n=new Set(p);on?n.add(name):n.delete(name);return n;});
+  },[]);
+
+  const doA=useCallback(()=>{setAPulse(true);setTimeout(()=>setAPulse(false),180);},[]);
+
+  // movement loop
+  useEffect(()=>{
+    let raf,last=performance.now();
+    const loop=(t)=>{
+      const dt=Math.min(50,t-last)/16.7;last=t;
+      setPos(p=>{
+        let {x,y}=p;const s=1.5*dt;
+        if(held.current.has("left"))x-=s;
+        if(held.current.has("right"))x+=s;
+        if(held.current.has("up"))y-=s;
+        if(held.current.has("down"))y+=s;
+        x=Math.max(4,Math.min(92,x));y=Math.max(8,Math.min(80,y));
+        return {x,y};
+      });
+      raf=requestAnimationFrame(loop);
+    };
+    raf=requestAnimationFrame(loop);
+    return ()=>cancelAnimationFrame(raf);
+  },[]);
+
+  // coin collection
+  useEffect(()=>{
+    setCoins(cs=>{
+      let hit=0;
+      const left=cs.filter(c=>{const d=Math.hypot(c.x-pos.x,c.y-pos.y);if(d<7){hit++;return false;}return true;});
+      if(hit){setScore(s=>s+hit*10);const add=[];for(let i=0;i<hit;i++)add.push(spawnCoin());return left.concat(add);}
+      return cs;
+    });
+  },[pos]);
+
+  // clock
+  useEffect(()=>{const id=setInterval(()=>setTime(t=>t+1),1000);return ()=>clearInterval(id);},[]);
+
+  // keyboard
+  useEffect(()=>{
+    const map={ArrowLeft:"left",ArrowRight:"right",ArrowUp:"up",ArrowDown:"down",a:"left",d:"right",w:"up",s:"down"};
+    const down=(e)=>{
+      const k=e.key.length===1?e.key.toLowerCase():e.key;
+      if(map[k]){e.preventDefault();hold(map[k],true);}
+      else if(k==="x"){hold("A",true);doA();}
+      else if(k==="z"){hold("B",true);}
+      else if(k==="Escape"){onExit();}
+    };
+    const up=(e)=>{
+      const k=e.key.length===1?e.key.toLowerCase():e.key;
+      if(map[k])hold(map[k],false);
+      else if(k==="x")hold("A",false);
+      else if(k==="z")hold("B",false);
+    };
+    window.addEventListener("keydown",down);window.addEventListener("keyup",up);
+    return ()=>{window.removeEventListener("keydown",down);window.removeEventListener("keyup",up);};
+  },[hold,doA,onExit]);
+
+  const save=()=>{
+    setSaves(s=>[{id:Date.now(),t:fmt(time),score,x:pos.x,y:pos.y},...s].slice(0,6));
+    setFlash("save");setTimeout(()=>setFlash(""),520);
+  };
+  const loadSave=(s)=>{setPos({x:s.x,y:s.y});setScore(s.score);};
+  const fullscreen=()=>{const el=consoleRef.current;if(el&&el.requestFullscreen)el.requestFullscreen();};
+
+  const P=(n)=>pressed.has(n)?" press":"";
+
+  return (
+    <div className="emu-wrap">
+      <div className="emu-top">
+        <button className="backbtn" onClick={onExit}>‹ Salir</button>
+        <span className="now">Jugando <b>{g.title}</b> · {g.con}</span>
+        <span className="live"><i></i>EN VIVO</span>
+        <span style={{marginLeft:"auto",fontSize:17,color:"var(--muted)"}}>★ {score} · {fmt(time)}</span>
+      </div>
+
+      <div className="emu-stage">
+        <div className="console" ref={consoleRef}>
+          <div className="scr-frame">
+            <div className="gbscreen" style={{backgroundColor:g.ground}}>
+              <span className="hud">{g.mono} ×{score/10}</span>
+              <span className="hud2">{fmt(time)}</span>
+              {coins.map(c=><span key={c.id} className="coin" style={{left:c.x+"%",top:c.y+"%"}}/>)}
+              <div className="sprite" style={{left:pos.x+"%",top:pos.y+"%",transform:aPulse?"scale(1.35)":"scale(1)"}}/>
+              <div className="ground"/>
+            </div>
+          </div>
+          <div className="brand-plate">
+            <span className="gb">GAME<b>BASE</b></span>
+            <span className="pwr"><i></i>POWER</span>
+          </div>
+
+          <div className="controls">
+            <div className="dpad">
+              <button className="blank"></button>
+              <button className={P("up")} onPointerDown={()=>hold("up",true)} onPointerUp={()=>hold("up",false)} onPointerLeave={()=>hold("up",false)}>▲</button>
+              <button className="blank"></button>
+              <button className={P("left")} onPointerDown={()=>hold("left",true)} onPointerUp={()=>hold("left",false)} onPointerLeave={()=>hold("left",false)}>◀</button>
+              <button className="ctr"></button>
+              <button className={P("right")} onPointerDown={()=>hold("right",true)} onPointerUp={()=>hold("right",false)} onPointerLeave={()=>hold("right",false)}>▶</button>
+              <button className="blank"></button>
+              <button className={P("down")} onPointerDown={()=>hold("down",true)} onPointerUp={()=>hold("down",false)} onPointerLeave={()=>hold("down",false)}>▼</button>
+              <button className="blank"></button>
+            </div>
+
+            <div className="startsel">
+              <button className="pill">SELECT</button>
+              <button className="pill">START</button>
+            </div>
+
+            <div className="ab">
+              <button className={P("B")} onPointerDown={()=>hold("B",true)} onPointerUp={()=>hold("B",false)} onPointerLeave={()=>hold("B",false)}>B</button>
+              <button className={(aPulse?"press":"")} onPointerDown={()=>{hold("A",true);doA();}} onPointerUp={()=>hold("A",false)} onPointerLeave={()=>hold("A",false)}>A</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="toolbar">
+        <button className={"tool"+(flash==="save"?" flash":"")} onClick={save}>▤ Guardar estado</button>
+        <button className="tool" onClick={()=>saves[0]&&loadSave(saves[0])}>▣ Cargar último</button>
+        <button className="tool" onClick={fullscreen}>⛶ Pantalla completa</button>
+        <button className="tool" onClick={onExit}>✕ Cerrar juego</button>
+      </div>
+
+      <div className="tray">
+        <h4>ESTADOS GUARDADOS</h4>
+        <div className="tray-grid">
+          {saves.length===0 && <div className="ss-empty">Aún no hay estados. Pulsa “Guardar estado” para crear uno.</div>}
+          {saves.map(s=>(
+            <button className="ss" key={s.id} onClick={()=>loadSave(s)} style={{cursor:"pointer",textAlign:"left",padding:0}}>
+              <div className="th" style={{backgroundColor:g.ground}}>
+                <span className="coin" style={{left:"40%",top:"40%",animation:"none"}}/>
+              </div>
+              <div className="cap"><span>{s.t}</span><b>★{s.score}</b></div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="kbd-hint">
+        Controles: <kbd>← ↑ → ↓</kbd> o <kbd>WASD</kbd> mover · <kbd>X</kbd> botón A · <kbd>Z</kbd> botón B · recoge las monedas · <kbd>Esc</kbd> salir
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   APP
+   ========================================================= */
+function App(){
+  const persisted=(()=>{try{return JSON.parse(localStorage.getItem("gb_state")||"{}");}catch(e){return {};}})();
+  const [screen,setScreen]=useState(persisted.screen||"lib");
+  const [gameId,setGameId]=useState(persisted.gameId||null);
+  const [query,setQuery]=useState("");
+  const [filter,setFilter]=useState("all");
+  const [favs,setFavs]=useState(()=>{try{return JSON.parse(localStorage.getItem("gb_favs")||"{}");}catch(e){return {};}});
+
+  useEffect(()=>{try{localStorage.setItem("gb_state",JSON.stringify({screen,gameId}));}catch(e){}},[screen,gameId]);
+  useEffect(()=>{try{localStorage.setItem("gb_favs",JSON.stringify(favs));}catch(e){}},[favs]);
+
+  const game=GB_GAMES.find(g=>g.id===gameId)||GB_GAMES[0];
+  const toggleFav=(id)=>setFavs(f=>{const n={...f};n[id]?delete n[id]:n[id]=1;return n;});
+  const openGame=(id)=>{setGameId(id);setScreen("ficha");};
+  const play=(id)=>{setGameId(id);setScreen("emu");};
+  const home=()=>{setScreen("lib");setQuery("");};
+
+  // focus search on "/"
+  useEffect(()=>{
+    const h=(e)=>{if(e.key==="/"&&screen==="lib"&&document.activeElement.tagName!=="INPUT"){e.preventDefault();const i=document.querySelector(".search input");if(i)i.focus();}};
+    window.addEventListener("keydown",h);return ()=>window.removeEventListener("keydown",h);
+  },[screen]);
+
+  return (
+    <div className="app">
+      {screen!=="emu" &&
+        <TopBar query={query} setQuery={setQuery} onHome={home} count={GB_GAMES.length}/>}
+
+      {screen==="lib" &&
+        <Library query={query} filter={filter} setFilter={setFilter} onOpen={openGame} favs={favs} toggleFav={toggleFav}/>}
+
+      {screen==="ficha" &&
+        <Detail g={game} onBack={()=>setScreen("lib")} onPlay={play} fav={!!favs[game.id]} toggleFav={toggleFav}/>}
+
+      {screen==="emu" &&
+        <Emulator key={game.id} g={game} onExit={()=>setScreen("ficha")}/>}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App/>);
+</script>
+</body>
+</html>
