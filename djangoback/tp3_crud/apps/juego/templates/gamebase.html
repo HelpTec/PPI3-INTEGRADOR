@@ -499,15 +499,15 @@ function Shelf({shelf, onOpen, favs, toggleFav, onSeeAll}){
   const ref = useRef(null);
   const cols = useFitCount(ref);
   const visible = shelf.games.slice(0, cols);
-  const hidden  = shelf.games.length - visible.length;
+  const total = shelf.total || shelf.games.length;
 
   return (
     <div className="shelf">
       <div className="shelf-head">
-        <h3>{shelf.label} <span className="badge">{shelf.games.length}</span></h3>
-        {hidden > 0 && (
+        <h3>{shelf.label} <span className="badge">{total}</span></h3>
+        {total > visible.length && (
           <a href="#" onClick={e=>{e.preventDefault(); onSeeAll(shelf);}}>
-            ver todo ({shelf.games.length}) ›
+            ver todo ({total}) ›
           </a>
         )}
       </div>
@@ -524,6 +524,26 @@ function Shelf({shelf, onOpen, favs, toggleFav, onSeeAll}){
    CAMBIO 2 — CATALOG: grilla completa de una plataforma (scroll vertical)
    ========================================================= */
 function Catalog({shelf, onOpen, onBack, favs, toggleFav}){
+  const [games,   setGames]   = useState([]);
+  const [page,    setPage]    = useState(0);
+  const [total,   setTotal]   = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const fetchPage = useCallback((p) => {
+    setLoading(true);
+    fetch("/api/juegos/?platform=" + encodeURIComponent(shelf.platform) + "&page=" + p)
+      .then(r => r.json())
+      .then(d => {
+        setGames(prev => p === 1 ? (d.games || []) : prev.concat(d.games || []));
+        setTotal(d.total || 0);
+        setPage(p);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [shelf.platform]);
+
+  useEffect(() => { fetchPage(1); }, [fetchPage]);
+
   return (
     <>
       <div className="subbar">
@@ -531,11 +551,20 @@ function Catalog({shelf, onOpen, onBack, favs, toggleFav}){
         <span className="crumb">{shelf.label}</span>
       </div>
       <div className="scroll screen-anim">
+        {loading && games.length === 0 && <div className="loading">CARGANDO</div>}
         <div className="catalog-grid">
-          {shelf.games.map(g=>(
+          {games.map(g=>(
             <Card key={g.id} g={g} onOpen={onOpen} fav={!!favs[g.id]} toggleFav={toggleFav}/>
           ))}
         </div>
+        {games.length < total && (
+          <div style={{textAlign:"center",padding:"0 22px 30px"}}>
+            <button className="chip" onClick={()=>fetchPage(page+1)} disabled={loading}>
+              {loading ? "Cargando…" : "Cargar más (" + (total - games.length) + " restantes)"}
+            </button>
+          </div>
+        )}
+        <div style={{height:30}}/>
       </div>
     </>
   );
@@ -1304,7 +1333,14 @@ function App(){
       {screen==="lib" && (
         <Library
           shelves={shelves} platforms={platforms}
-          filter={filter} setFilter={p=>{setFilter(p);}}
+          filter={filter} setFilter={p=>{
+            setFilter(p);
+            if(p !== "all"){
+              const shelf = shelves.find(s=>s.platform===p) || {platform:p, label:p};
+              setCatalog(shelf);
+              setScreen("catalogo");
+            }
+          }}
           onOpen={openGame} favs={favs} toggleFav={toggleFav}
           loading={loading}
           searchResults={searchResults} searchTotal={searchTotal}
@@ -1314,10 +1350,9 @@ function App(){
         />
       )}
 
-      {/* CAMBIO 2 — vista catálogo completo de una plataforma */}
       {screen==="catalogo" && catalog && (
         <Catalog shelf={catalog} onOpen={openGame} favs={favs} toggleFav={toggleFav}
-          onBack={()=>setScreen("lib")}/>
+          onBack={()=>{ setFilter("all"); setScreen("lib"); }}/>
       )}
 
       {/* CAMBIO 1 — sección emulador separada */}

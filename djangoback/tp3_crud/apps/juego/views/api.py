@@ -77,7 +77,7 @@ def api_juegos(request):
     q = request.GET.get('q', '').strip()
     platform = request.GET.get('platform', '').strip()
     page = int(request.GET.get('page', 1))
-    PER_PAGE = 40
+    PER_PAGE = 10
 
     def game_dict(g):
         return {
@@ -119,13 +119,14 @@ def api_juegos(request):
     for plat in SHELF_PLATFORMS:
         if plat not in all_platforms:
             continue
-        games = list(
-            Juego.objects.filter(Platform__iexact=plat).order_by('Rank', 'id')[:20]
-        )
+        qs = Juego.objects.filter(Platform__iexact=plat).order_by('Rank', 'id')
+        total = qs.count()
+        games = list(qs[:5])
         if games:
             shelves.append({
                 'platform': plat,
                 'label':    SHELF_LABELS.get(plat, plat),
+                'total':    total,
                 'games':    [game_dict(g) for g in games],
             })
 
