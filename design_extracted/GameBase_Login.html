@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameBase · Iniciar sesión</title>
+<link rel="stylesheet" href="gb-hifi.css">
+<style>
+  html,body{overflow:auto;}
+  .auth{
+    min-height:100vh;display:grid;grid-template-columns:1.05fr .95fr;
+    background:radial-gradient(120% 90% at 50% -10%, #1a2014 0%, var(--bg) 60%);
+  }
+
+  /* ---------- brand panel ---------- */
+  .brandside{
+    position:relative;overflow:hidden;
+    background:linear-gradient(160deg,#13180f 0%,#0c0f0b 100%);
+    border-right:3px solid var(--green-d);
+    display:flex;flex-direction:column;justify-content:space-between;
+    padding:46px 52px;
+  }
+  .brandside::after{ /* scanlines */
+    content:"";position:absolute;inset:0;pointer-events:none;z-index:1;
+    background:repeating-linear-gradient(0deg,rgba(0,0,0,.16) 0 3px,transparent 3px 6px);
+  }
+  .stars{position:absolute;inset:0;z-index:0;}
+  .px{position:absolute;width:8px;height:8px;image-rendering:pixelated;animation:float 5s ease-in-out infinite;}
+  @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+  .b-top{position:relative;z-index:2;display:flex;align-items:center;gap:13px;}
+  .b-top svg{width:38px;height:38px;color:var(--green);}
+  .b-top .nm{font-family:var(--pixel-font);font-size:20px;color:var(--text);}
+  .b-top .nm b{color:var(--green);}
+
+  .b-mid{position:relative;z-index:2;}
+  .b-tag{
+    font-family:var(--pixel-font);font-size:30px;line-height:1.5;color:var(--text);
+    margin:0 0 18px;text-wrap:balance;
+  }
+  .b-tag em{color:var(--green);font-style:normal;}
+  .b-sub{font-size:23px;color:var(--muted);max-width:34ch;margin:0 0 26px;line-height:1.3;}
+  .b-chips{display:flex;gap:9px;flex-wrap:wrap;}
+  .b-chip{font-size:17px;color:var(--text);background:rgba(155,188,15,.08);border:2px solid var(--green-d);padding:6px 12px;}
+  .b-chip b{color:var(--green);font-weight:normal;}
+
+  .b-foot{position:relative;z-index:2;display:flex;align-items:center;gap:10px;font-family:var(--pixel-font);font-size:11px;color:var(--muted);}
+  .b-foot .blink{color:var(--green);animation:bk 1.1s steps(1) infinite;}
+  @keyframes bk{50%{opacity:.2}}
+
+  /* big pixel coins decoration */
+  .deco-coin{position:absolute;width:18px;height:18px;background:#c7e04a;box-shadow:0 0 0 3px #0f380f;z-index:1;animation:spin2 1.4s steps(4) infinite;}
+  @keyframes spin2{50%{transform:scaleX(.25)}}
+
+  /* ---------- form panel ---------- */
+  .formside{display:flex;align-items:center;justify-content:center;padding:40px 28px;}
+  .card{width:100%;max-width:400px;}
+  .f-head{font-family:var(--pixel-font);font-size:19px;color:var(--text);margin:0 0 6px;}
+  .f-sub{font-size:20px;color:var(--muted);margin:0 0 28px;}
+  .f-sub a{color:var(--green);cursor:pointer;text-decoration:none;}
+  .f-sub a:hover{text-decoration:underline;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-family:var(--ui-font);font-size:17px;text-transform:uppercase;letter-spacing:1px;color:var(--muted);margin-bottom:7px;}
+  .inwrap{display:flex;align-items:center;background:var(--surface);border:2px solid var(--line);transition:.12s;}
+  .inwrap:focus-within{border-color:var(--green);box-shadow:3px 3px 0 var(--green-dd);}
+  .inwrap.bad{border-color:#d8623c;}
+  .inwrap input{
+    flex:1;background:none;border:0;outline:0;color:var(--text);
+    font-family:var(--ui-font);font-size:21px;padding:12px 14px;min-width:0;
+  }
+  .inwrap input::placeholder{color:var(--muted-2);}
+  .inwrap .toggle{background:none;border:0;color:var(--muted);font-family:var(--ui-font);font-size:16px;padding:0 12px;cursor:pointer;white-space:nowrap;}
+  .inwrap .toggle:hover{color:var(--green);}
+  .err{font-size:16px;color:#e08a6c;margin-top:6px;min-height:1px;display:none;}
+  .err.show{display:block;}
+
+  .row-between{display:flex;justify-content:space-between;align-items:center;margin:2px 0 22px;}
+  .remember{display:flex;align-items:center;gap:8px;font-size:18px;color:var(--muted);cursor:pointer;user-select:none;}
+  .remember .box{width:20px;height:20px;border:2px solid var(--line-2);background:var(--surface);display:grid;place-items:center;color:var(--ink);font-size:14px;}
+  .remember.on .box{background:var(--green);border-color:var(--green);}
+  .forgot{font-size:18px;color:var(--muted);text-decoration:none;}
+  .forgot:hover{color:var(--green);}
+
+  .btn-primary{
+    width:100%;font-family:var(--pixel-font);font-size:15px;color:var(--ink);
+    background:var(--green);border:3px solid var(--ink);padding:16px;
+    box-shadow:5px 5px 0 var(--green-dd);transition:.1s;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+  }
+  .btn-primary:hover{background:var(--green-2);transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--green-dd);}
+  .btn-primary:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--green-dd);}
+  .btn-primary[disabled]{opacity:.7;cursor:default;transform:none;}
+
+  .divider{display:flex;align-items:center;gap:14px;margin:22px 0;color:var(--muted-2);font-size:17px;}
+  .divider::before,.divider::after{content:"";flex:1;height:2px;background:var(--line);}
+
+  .btn-google{
+    width:100%;display:flex;align-items:center;justify-content:center;gap:12px;
+    font-family:var(--ui-font);font-size:21px;color:var(--text);
+    background:var(--surface);border:2px solid var(--line-2);padding:13px;cursor:pointer;transition:.12s;
+  }
+  .btn-google:hover{border-color:var(--green);background:var(--surface-2);}
+  .btn-google svg{width:22px;height:22px;flex:0 0 auto;}
+
+  .toast{
+    position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(80px);
+    background:var(--green);color:var(--ink);font-family:var(--pixel-font);font-size:12px;
+    padding:14px 20px;border:3px solid var(--ink);box-shadow:5px 5px 0 var(--green-dd);
+    z-index:50;transition:transform .25s ease;
+  }
+  .toast.show{transform:translateX(-50%) translateY(0);}
+
+  /* hidden register-only fields */
+  .reg-only{display:none;}
+  body.mode-register .reg-only{display:block;}
+
+  @media(max-width:860px){
+    .auth{grid-template-columns:1fr;}
+    .brandside{padding:30px 28px;border-right:0;border-bottom:3px solid var(--green-d);}
+    .b-mid{margin:22px 0;}
+    .b-tag{font-size:22px;}
+    .b-sub{font-size:20px;}
+    .formside{padding:34px 22px 60px;}
+  }
+  @media(max-width:460px){
+    .brandside{padding:24px 20px;}
+    .b-tag{font-size:18px;}
+    .b-chips{display:none;}
+  }
+</style>
+</head>
+<body>
+<div class="auth">
+
+  <!-- ===== BRAND PANEL ===== -->
+  <section class="brandside">
+    <div class="stars" id="stars"></div>
+
+    <div class="b-top">
+      <svg viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="32.5" y="35" width="5" height="5" rx="1" fill="currentColor"/>
+        <rect x="17.5" y="27.5" width="5" height="15" rx="1" fill="currentColor"/>
+        <rect x="27.5" y="32.5" width="5" height="15" rx="1" transform="rotate(90 27.5 32.5)" fill="currentColor"/>
+        <rect x="40" y="30" width="5" height="5" rx="1" fill="currentColor"/>
+        <path d="M35 20V18.12C35 16.62 35 15.87 34.58 15.33C34.15 14.79 33.43 14.61 31.97 14.24L28.03 13.26C26.57 12.89 25.85 12.71 25.42 12.17C25 11.63 25 10.88 25 9.38V5" stroke="currentColor" stroke-width="4" stroke-linecap="round"/>
+        <path d="M7.5 35C7.5 28.6 7.5 25.4 9.05 23.2C9.45 22.63 9.91 22.13 10.43 21.69C12.45 20 15.39 20 21.25 20H38.75C44.61 20 47.55 20 49.57 21.69C50.09 22.13 50.55 22.63 50.95 23.2C52.5 25.4 52.5 28.6 52.5 35C52.5 41.4 52.5 44.6 50.95 46.8C50.55 47.37 50.09 47.87 49.57 48.31C47.55 50 44.61 50 38.75 50H21.25C15.39 50 12.45 50 10.43 48.31C9.91 47.87 9.45 47.37 9.05 46.8C7.5 44.6 7.5 41.4 7.5 35Z" stroke="currentColor" stroke-width="4"/>
+      </svg>
+      <span class="nm">GAME<b>BASE</b></span>
+    </div>
+
+    <div class="b-mid">
+      <h1 class="b-tag">La enciclopedia del<br><em>gaming retro.</em></h1>
+      <p class="b-sub">Cada juego hasta 2012, en un solo lugar. Explorá consolas, fichas y rarezas de la historia del gaming.</p>
+      <div class="b-chips">
+        <span class="b-chip"><b>+1.400</b> juegos</span>
+        <span class="b-chip"><b>6</b> consolas</span>
+        <span class="b-chip">archivo <b>hasta 2012</b></span>
+      </div>
+    </div>
+
+    <div class="b-foot"><span class="blink">●</span> INSERT COIN TO CONTINUE</div>
+  </section>
+
+  <!-- ===== FORM PANEL ===== -->
+  <section class="formside">
+    <form class="card" id="form" novalidate>
+      <h2 class="f-head" id="title">Iniciar sesión</h2>
+      <p class="f-sub" id="switchLine">¿No tenés cuenta? <a id="switchBtn">Registrate</a></p>
+
+      <div class="field reg-only">
+        <label for="name">Nombre de jugador</label>
+        <div class="inwrap"><input id="name" type="text" placeholder="Player One" autocomplete="nickname"></div>
+      </div>
+
+      <div class="field">
+        <label for="email">Correo electrónico</label>
+        <div class="inwrap" id="emailWrap"><input id="email" type="email" placeholder="tucorreo@gmail.com" autocomplete="email"></div>
+        <p class="err" id="emailErr">Ingresá un correo válido.</p>
+      </div>
+
+      <div class="field">
+        <label for="pass">Contraseña</label>
+        <div class="inwrap" id="passWrap">
+          <input id="pass" type="password" placeholder="••••••••" autocomplete="current-password">
+          <button type="button" class="toggle" id="peek">mostrar</button>
+        </div>
+        <p class="err" id="passErr">Mínimo 6 caracteres.</p>
+      </div>
+
+      <div class="row-between">
+        <div class="remember on" id="remember"><span class="box">✓</span> Recordarme</div>
+        <a class="forgot" href="#">¿Olvidaste tu contraseña?</a>
+      </div>
+
+      <button class="btn-primary" id="submit" type="submit">INGRESAR</button>
+
+      <div class="divider">o</div>
+
+      <button class="btn-google" id="google" type="button">
+        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3c-1.6 4.7-6.1 8-11.3 8a12 12 0 1 1 7.9-21l5.7-5.7A20 20 0 1 0 24 44a20 20 0 0 0 19.6-23.5z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8A12 12 0 0 1 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7A20 20 0 0 0 6.3 14.7z"/>
+          <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2A12 12 0 0 1 12.7 28l-6.5 5A20 20 0 0 0 24 44z"/>
+          <path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3a12 12 0 0 1-4.1 5.6l6.2 5.2C39.9 35.4 44 30.3 44 24c0-1.2-.1-2.4-.4-3.5z"/>
+        </svg>
+        <span id="gtext">Ingresar con Google</span>
+      </button>
+    </form>
+  </section>
+</div>
+
+<div class="toast" id="toast">✓ ¡BIENVENIDO, PLAYER ONE!</div>
+
+<script>
+(function(){
+  // pixel starfield + floating blocks in brand panel
+  var stars=document.getElementById('stars');
+  var cols=['#9bbc0f','#c7e04a','#306230','#e0b341','#e94f8a','#5aa0c4'];
+  for(var i=0;i<46;i++){
+    var s=document.createElement('span');
+    var coin=Math.random()<0.18;
+    s.className=coin?'deco-coin':'px';
+    var sz=coin?16:(Math.random()<.3?12:7);
+    s.style.left=Math.random()*100+'%';
+    s.style.top=Math.random()*100+'%';
+    if(!coin){
+      s.style.width=s.style.height=sz+'px';
+      s.style.background=cols[(Math.random()*cols.length)|0];
+      s.style.opacity=(0.18+Math.random()*0.5).toFixed(2);
+      s.style.animationDelay=(Math.random()*5).toFixed(1)+'s';
+    }else{
+      s.style.animationDelay=(Math.random()*1.4).toFixed(1)+'s';
+    }
+    stars.appendChild(s);
+  }
+
+  var body=document.body, mode='login';
+  var title=document.getElementById('title');
+  var switchLine=document.getElementById('switchLine');
+  var switchBtn=document.getElementById('switchBtn');
+  var submit=document.getElementById('submit');
+  var pass=document.getElementById('pass');
+  var passInput=pass;
+
+  switchBtn.addEventListener('click',function(){
+    mode = mode==='login' ? 'register' : 'login';
+    body.classList.toggle('mode-register', mode==='register');
+    if(mode==='register'){
+      title.textContent='Crear cuenta';
+      submit.textContent='REGISTRARME';
+      switchLine.innerHTML='¿Ya tenés cuenta? <a id="switchBtn">Iniciá sesión</a>';
+      passInput.setAttribute('autocomplete','new-password');
+    }else{
+      title.textContent='Iniciar sesión';
+      submit.textContent='INGRESAR';
+      switchLine.innerHTML='¿No tenés cuenta? <a id="switchBtn">Registrate</a>';
+      passInput.setAttribute('autocomplete','current-password');
+    }
+    // rebind (innerHTML replaced the node)
+    switchBtn=document.getElementById('switchBtn');
+    switchBtn.addEventListener('click',arguments.callee);
+  });
+
+  // show/hide password
+  document.getElementById('peek').addEventListener('click',function(){
+    var t=pass.type==='password';
+    pass.type=t?'text':'password';
+    this.textContent=t?'ocultar':'mostrar';
+  });
+
+  // remember toggle
+  var rem=document.getElementById('remember');
+  rem.addEventListener('click',function(){
+    rem.classList.toggle('on');
+    rem.querySelector('.box').textContent=rem.classList.contains('on')?'✓':'';
+  });
+
+  // validation
+  var email=document.getElementById('email');
+  function vEmail(){
+    var ok=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value.trim());
+    document.getElementById('emailWrap').classList.toggle('bad',!ok&&email.value!=='');
+    document.getElementById('emailErr').classList.toggle('show',!ok&&email.value!=='');
+    return ok;
+  }
+  function vPass(){
+    var ok=pass.value.length>=6;
+    document.getElementById('passWrap').classList.toggle('bad',!ok&&pass.value!=='');
+    document.getElementById('passErr').classList.toggle('show',!ok&&pass.value!=='');
+    return ok;
+  }
+  email.addEventListener('blur',vEmail);
+  pass.addEventListener('blur',vPass);
+  email.addEventListener('input',function(){if(document.getElementById('emailWrap').classList.contains('bad'))vEmail();});
+  pass.addEventListener('input',function(){if(document.getElementById('passWrap').classList.contains('bad'))vPass();});
+
+  var toast=document.getElementById('toast');
+  function showToast(msg){
+    toast.textContent=msg;
+    toast.classList.add('show');
+    setTimeout(function(){toast.classList.remove('show');},2600);
+  }
+
+  document.getElementById('form').addEventListener('submit',function(e){
+    e.preventDefault();
+    var a=vEmail(), b=vPass();
+    if(email.value==='' ){document.getElementById('emailWrap').classList.add('bad');document.getElementById('emailErr').classList.add('show');a=false;}
+    if(pass.value===''){document.getElementById('passWrap').classList.add('bad');document.getElementById('passErr').classList.add('show');b=false;}
+    if(!a||!b){
+      var c=document.querySelector('.card');
+      c.animate([{transform:'translateX(0)'},{transform:'translateX(-7px)'},{transform:'translateX(7px)'},{transform:'translateX(0)'}],{duration:240});
+      return;
+    }
+    submit.disabled=true;
+    var orig=submit.textContent;
+    submit.textContent='CARGANDO…';
+    setTimeout(function(){
+      submit.disabled=false;submit.textContent=orig;
+      showToast(mode==='register'?'✓ ¡CUENTA CREADA!':'✓ ¡BIENVENIDO DE NUEVO!');
+    },900);
+  });
+
+  // google
+  document.getElementById('google').addEventListener('click',function(){
+    var g=document.getElementById('gtext');var o=g.textContent;
+    g.textContent='Conectando…';this.disabled=true;
+    var self=this;
+    setTimeout(function(){g.textContent=o;self.disabled=false;showToast('✓ CONECTADO CON GOOGLE');},1000);
+  });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+# Carpeta de ROMs
+
+Poné los archivos de ROM acá para que aparezcan en la sección Emulador.
+
+Nombres esperados (deben coincidir con lo configurado en EMULABLES dentro de gamebase.html):
+  juego-nes.nes   → NES  (core: nes)
+  juego-snes.sfc  → SNES (core: snes)
+  juego-gb.gb     → Game Boy (core: gb)
+
+Formatos compatibles via EmulatorJS:
+  NES  → .nes
+  SNES → .sfc / .smc
+  GB   → .gb
+  GBC  → .gbc
+  GBA  → .gba
+  GEN  → .md / .bin
+  N64  → .z64 / .n64
+  PS1  → .bin + .cue / .img
+
+Para agregar un juego nuevo:
+  1. Copiá el archivo a esta carpeta
+  2. Abrí gamebase.html y editá el array EMULABLES
+  3. Agregá: { id, name, platform, rom: '/static/roms/archivo.ext', core: 'nes' }
+
