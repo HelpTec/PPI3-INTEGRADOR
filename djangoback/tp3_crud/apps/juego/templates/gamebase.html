@@ -329,20 +329,21 @@ const EMULABLES = [
     image_url: "", pal_idx: 0,
     rom: null, core: null,              // ← juego interno, sin ROM externa
   },
-  {
-    id: "emu-nes", name: "Juego NES", platform: "NES",
-    image_url: "", pal_idx: 2,
-    rom: "/static/roms/juego-nes.nes", core: "nes",
+ 
+{
+    id: "emu-nes", name: "Pentablocat", platform: "NES",
+    image_url: "https://img.itch.zone/aW1nLzExMDM0ODk4LnBuZw==/original/XB0rbn.png", pal_idx: 2,
+    rom: "/static/roms/pentablocat.nes", core: "nes",
   },
   {
-    id: "emu-snes", name: "Juego SNES", platform: "SNES",
-    image_url: "", pal_idx: 5,
-    rom: "/static/roms/juego-snes.sfc", core: "snes",
+    id: "emu-nes2", name: "BladeBuster", platform: "NES",
+    image_url: "https://www.retrones.net/sites/default/files/capturas/BladeBuster%20201409210915237.png", pal_idx: 5,
+    rom: "/static/roms/BladeBuster.nes", core: "nes",
   },
   {
-    id: "emu-gb", name: "Juego Game Boy", platform: "GB",
-    image_url: "", pal_idx: 8,
-    rom: "/static/roms/juego-gb.gb", core: "gb",
+    id: "emu-nes3", name: "DesertEscape", platform: "NES",
+    image_url: "https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/ba7bee9d-0965-409c-a653-9490f8941cd7/dhnjw47-c6248122-e67e-4f6b-a4fd-369e852754bb.png/v1/fit/w_828,h_1160/desert_escape__by_hjrodrigo_dhnjw47-414w-2x.png?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7ImhlaWdodCI6Ijw9MTc5MyIsInBhdGgiOiIvZi9iYTdiZWU5ZC0wOTY1LTQwOWMtYTY1My05NDkwZjg5NDFjZDcvZGhuanc0Ny1jNjI0ODEyMi1lNjdlLTRmNmItYTRmZC0zNjllODUyNzU0YmIucG5nIiwid2lkdGgiOiI8PTEyODAifV1dLCJhdWQiOlsidXJuOnNlcnZpY2U6aW1hZ2Uub3BlcmF0aW9ucyJdfQ.UcdHcZU_gbhlJD0OikK7rKGzm3gUuL4vYj-j7ZPQ2ec", pal_idx: 8,
+    rom: "/static/roms/Desert Escape! v1.1.nes", core: "nes",
   },
 ];
 
@@ -728,14 +729,24 @@ function RealEmulator({g, onExit}){
     document.body.appendChild(script);
 
     return ()=>{
-      const s = document.getElementById("ejs-loader");
-      if(s) s.parentNode.removeChild(s);
-      // Detener audio/loop si el emulador lo expone
       try{
-        if(window.EJS_emulator)
-          window.EJS_emulator.module._emscripten_cancel_main_loop?.();
+        if(window.EJS_emulator){
+          if(window.EJS_emulator.pause) window.EJS_emulator.pause();
+          if(window.EJS_emulator.module){
+            var mod = window.EJS_emulator.module;
+            if(mod._emscripten_cancel_main_loop) mod._emscripten_cancel_main_loop();
+            var ac = (mod.SDL2 && mod.SDL2.audioContext) || window.EJS_emulator.audioContext;
+            if(ac && ac.state !== "closed") ac.close();
+          }
+        }
       }catch(e){}
-      delete window.EJS_emulator;
+      var cont = document.getElementById("ejs-container");
+      if(cont) cont.innerHTML = "";
+      var ejsScripts = document.querySelectorAll('script[src*="emulatorjs"]');
+      for(var i=0;i<ejsScripts.length;i++){ ejsScripts[i].remove(); }
+      var ejsKeys = ["EJS_emulator","EJS_player","EJS_core","EJS_gameUrl","EJS_pathtodata",
+        "EJS_startOnLoaded","EJS_color","EJS_backgroundColor","EJS_defaultOptions"];
+      for(var j=0;j<ejsKeys.length;j++){ delete window[ejsKeys[j]]; }
     };
   },[romOk, g.rom, g.core]);
 
@@ -777,7 +788,7 @@ function RealEmulator({g, onExit}){
       )}
 
       {romOk === true && (
-        <div style={{flex:1,position:"relative",background:"#0c0f0b"}}>
+        <div style={{flex:1,minHeight:0,position:"relative",background:"#0c0f0b",overflow:"hidden"}}>
           <div id="ejs-container" style={{
             position:"absolute",inset:0,width:"100%",height:"100%"
           }}/>
