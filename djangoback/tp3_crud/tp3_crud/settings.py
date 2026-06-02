@@ -27,12 +27,21 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-kcidmmnj3b!@t!^tu)3oau+-ef=8ht2rt3h8&2%tqxbe*$(kmu'
+SECRET_KEY = config('SECRET_KEY', default='django-insecure-kcidmmnj3b!@t!^tu)3oau+-ef=8ht2rt3h8&2%tqxbe*$(kmu')
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = config(
+    'ALLOWED_HOSTS',
+    default='localhost,127.0.0.1,.onrender.com',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
+
+CSRF_TRUSTED_ORIGINS = config(
+    'CSRF_TRUSTED_ORIGINS',
+    default='http://localhost:8000',
+    cast=lambda v: [s.strip() for s in v.split(',')]
+)
 
 LOGOUT_REDIRECT_URL = '/login'
 LOGIN_REDIRECT_URL = '/'
@@ -67,6 +76,7 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -144,6 +154,8 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [BASE_DIR / "static"]
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -155,44 +167,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # ==============================================================================
 
 AUTHENTICATION_BACKENDS = [
-    'apps.juego.ldap_backend.LDAP3Backend',  # Backend personalizado con ldap3 puro
-    'django.contrib.auth.backends.ModelBackend',  # Fallback a autenticación local
+    'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',  # Google OAuth
 ]
-
-# Configuración del servidor LDAP/AD
-LDAP_AUTH_URL = config('LDAP_AUTH_URL')
-
-# Usar conexión TLS/SSL para seguridad
-LDAP_AUTH_USE_TLS = config('LDAP_AUTH_USE_TLS', cast=bool, default=False)
-
-# Usuario de búsqueda (bind user) - necesario para buscar usuarios en AD
-LDAP_AUTH_CONNECTION_USERNAME = os.getenv('LDAP_AUTH_CONNECTION_USERNAME')
-LDAP_AUTH_CONNECTION_PASSWORD = os.getenv('LDAP_AUTH_CONNECTION_PASSWORD')
-
-# Base DN donde buscar usuarios
-LDAP_AUTH_SEARCH_BASE = config('LDAP_AUTH_SEARCH_BASE', default="DC=IFTS,DC=local")
-
-# Logging para LDAP (útil para debugging)
-LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'handlers': {
-        'console': {
-            'class': 'logging.StreamHandler',
-        },
-    },
-    'loggers': {
-        'apps.juego.ldap_utils': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        },
-        'apps.juego.ldap_backend': {
-            'handlers': ['console'],
-            'level': 'INFO',
-        },
-    },
-}
 
 # ==============================================================================
 # Configuración de Google OAuth (django-allauth)

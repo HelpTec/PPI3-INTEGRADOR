@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: gamebase
+    runtime: python
+    rootDir: djangoback/tp3_crud
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn tp3_crud.wsgi:application"
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DEBUG
+        value: false
+      - key: ALLOWED_HOSTS
+        value: .onrender.com
+      - key: CSRF_TRUSTED_ORIGINS
+        value: https://gamebase.onrender.com
+      - key: PYTHON_VERSION
+        value: 3.11.0
