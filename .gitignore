@@ -1,4 +1,40 @@
-.env
+# ── Entorno Python ──────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
 *.pyc
+*.pyo
+*.pyd
 __pycache__/
-db.sqlite3
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# ── Django ───────────────────────────────────────────────
+*.sqlite3
+staticfiles/
+media/
+*.log
+local_settings.py
+
+# ── Secretos y configuración local ──────────────────────
+.env
+.env.*
+!.env.example
+
+# ── Caché de tokens externos ─────────────────────────────
+twitch_token.json
+
+# ── IDEs y sistema operativo ─────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.user
+.DS_Store
+Thumbs.db
+
+# ── Node (por si se agrega build frontend en el futuro) ──
+node_modules/
+npm-debug.log*
