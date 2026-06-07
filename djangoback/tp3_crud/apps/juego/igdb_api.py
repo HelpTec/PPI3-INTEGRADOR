@@ -46,9 +46,12 @@ def _get_twitch_access_token():
 
     if access_token and expires_in:
         expires_at = datetime.now() + timedelta(seconds=expires_in)
-        with open(TOKEN_FILE_PATH, 'w') as f:
-            json.dump({"access_token": access_token, "expires_at": expires_at.isoformat()}, f)
-        logger.debug("New Twitch token cached. Expires in %s seconds.", expires_in)
+        try:
+            with open(TOKEN_FILE_PATH, 'w') as f:
+                json.dump({"access_token": access_token, "expires_at": expires_at.isoformat()}, f)
+            logger.debug("New Twitch token cached. Expires in %s seconds.", expires_in)
+        except OSError as e:
+            logger.warning("Could not cache Twitch token: %s", e)
         return access_token
 
     logger.debug("Failed to obtain Twitch access token.")
@@ -76,6 +79,36 @@ _AGE_RATING_LABELS = {1:'3+',2:'7+',3:'12+',4:'16+',5:'18+',
                       6:'RP',7:'EC',8:'E',9:'E10+',10:'T',11:'M',12:'AO'}
 _AGE_RATING_ORG    = {1:'PEGI',2:'PEGI',3:'PEGI',4:'PEGI',5:'PEGI',
                       6:'ESRB',7:'ESRB',8:'ESRB',9:'ESRB',10:'ESRB',11:'ESRB',12:'ESRB'}
+
+
+def _search_by_name(headers, fields, game_name):
+    """
+    Search strategy (in order):
+    1. Exact name match, main release only (version_parent = null)
+    2. Exact name match, any release
+    3. Fuzzy search (IGDB's `search`)
+    4. If name has '/', retry steps 1-3 with the first part only
+    """
+    def _exact(name):
+        safe = name.replace('"', '').replace("'", "\\'")
+        r = _igdb_post(headers, 'games',
+                       f'fields {fields}; where name = "{safe}" & version_parent = null; limit 1;')
+        if not r:
+            r = _igdb_post(headers, 'games',
+                           f'fields {fields}; where name = "{safe}"; limit 1;')
+        return r
+
+    def _fuzzy(name):
+        safe = name.replace('"', '')
+        return _igdb_post(headers, 'games', f'search "{safe}"; fields {fields}; limit 1;')
+
+    results = _exact(game_name) or _fuzzy(game_name)
+
+    if not results and '/' in game_name:
+        first_part = game_name.split('/')[0].strip()
+        results = _exact(first_part) or _fuzzy(first_part)
+
+    return results
 
 
 def get_full_game_detail(igdb_id=None, game_name=None):
@@ -113,13 +146,12 @@ def get_full_game_detail(igdb_id=None, game_name=None):
 
     if igdb_id:
         query = f'fields {fields}; where id = {igdb_id}; limit 1;'
+        results = _igdb_post(headers, 'games', query)
     elif game_name:
-        safe = game_name.replace('"', '')
-        query = f'search "{safe}"; fields {fields}; limit 1;'
+        results = _search_by_name(headers, fields, game_name)
     else:
         return None
 
-    results = _igdb_post(headers, 'games', query)
     if not results:
         return None
     d = results[0]

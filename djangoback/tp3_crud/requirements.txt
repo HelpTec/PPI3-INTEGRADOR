@@ -2,11 +2,9 @@ Django==4.2.17
 django-bootstrap5
 python-decouple
 python-dotenv
-google-generativeai
+google-genai
 django-allauth
 PyJWT
 cryptography
-gunicorn
-whitenoise
 gunicorn
 whitenoise

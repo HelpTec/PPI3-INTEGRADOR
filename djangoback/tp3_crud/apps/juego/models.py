@@ -14,3 +14,4 @@ class Juego(models.Model):
     Global_Sales = models.FloatField(null=True, blank=True)
     API_ID = models.CharField(max_length=100, unique=True, null=True, blank=True)
     Image_URL = models.URLField(max_length=500, null=True, blank=True)
+    Summary_ES = models.TextField(null=True, blank=True)

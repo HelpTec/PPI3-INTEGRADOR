@@ -3,25 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator
 from ..models import Juego
 from .mixins import ImagenEnriquecidaMixin
-
-PLAYABLE_PLATFORMS = {
-    'NES', 'SNES', 'GB', 'GBA', 'GEN', 'N64', 'PS',
-    '2600', 'GG', 'NG', 'TG16', 'SAT', 'DC', 'GC',
-}
-
-SHELF_PLATFORMS = ['NES', 'SNES', 'GB', 'GBA', 'GEN', 'N64', 'PS', 'PS2', 'DS', '2600']
-SHELF_LABELS = {
-    'NES':  'CLÁSICOS NES',
-    'SNES': 'ERA SNES',
-    'GB':   'PORTÁTILES GAME BOY',
-    'GBA':  'GAME BOY ADVANCE',
-    'GEN':  'VELOCIDAD GENESIS',
-    'N64':  'ERA NINTENDO 64',
-    'PS':   'GENERACIÓN PS1',
-    'PS2':  'ERA PS2',
-    'DS':   'PORTÁTILES DS',
-    '2600': 'ATARI 2600',
-}
+from ..services.game_service import PLAYABLE_PLATFORMS, SHELF_PLATFORMS, SHELF_LABELS
 
 
 class JuegoView(LoginRequiredMixin, ImagenEnriquecidaMixin, TemplateView):

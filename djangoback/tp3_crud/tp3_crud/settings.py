@@ -15,12 +15,8 @@ import os
 from decouple import config
 from dotenv import load_dotenv
 
-load_dotenv()
-
-TWITCH_CLIENT_ID = os.getenv('ryibth8v88mg80rr07x098mvv3i696')
-TWITCH_CLIENT_SECRET = os.getenv('0tt88o4ww4cf0htqfj8vnqi3fiv1d1')
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
