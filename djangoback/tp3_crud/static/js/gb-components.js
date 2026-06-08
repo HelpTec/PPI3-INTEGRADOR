@@ -1,17 +1,36 @@
 const { useState, useEffect, useRef, useCallback } = React;
-const { palette, coverBg, useFitCount } = window;
+const { palette, coverBg, useFitCount, fetchCover } = window;
+
+/* Carga lazy de portada: cuando la card entra al viewport y no tiene imagen,
+   pide la portada a IGDB en segundo plano y la muestra al instante. */
+function useLazyCover(g) {
+  const [url, setUrl] = useState(g.image_url || '');
+  const ref = useRef(null);
+  useEffect(() => {
+    if (url || !g.id) return;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      obs.disconnect();
+      fetchCover(g.id).then(u => { if (u) setUrl(u); });
+    }, { rootMargin: '200px' });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, [g.id]);
+  return { url, ref };
+}
 
 function Card({g, onOpen, fav, toggleFav}){
-  const pal = palette(g.id);
+  const pal  = palette(g.id);
   const mono = (g.name||'??').slice(0,2).toUpperCase();
+  const { url, ref } = useLazyCover(g);
   return (
-    <button className="card" onClick={()=>onOpen(g)}>
-      <div className="cover" style={{background: g.image_url ? undefined : coverBg(pal)}}>
-        {g.image_url && <img src={g.image_url} alt={g.name} loading="lazy"/>}
+    <button className="card" ref={ref} onClick={()=>onOpen(g)}>
+      <div className="cover" style={{background: url ? undefined : coverBg(pal)}}>
+        {url && <img src={url} alt={g.name} loading="lazy"/>}
         <span className="con-tag">{g.platform}</span>
         <span className={"fav"+(fav?" on":"")}
           onClick={e=>{e.stopPropagation(); toggleFav(g);}}>{fav?"★":"☆"}</span>
-        {!g.image_url && <span className="mono">{mono}</span>}
+        {!url && <span className="mono">{mono}</span>}
       </div>
       <div className="c-title">{g.name}</div>
       <div className="c-meta">{g.year} · {g.genre}</div>

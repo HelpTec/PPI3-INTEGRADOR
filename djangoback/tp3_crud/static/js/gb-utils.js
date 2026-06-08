@@ -57,4 +57,37 @@ function useFitCount(ref, cardWidth=166){
   return cols;
 }
 
-Object.assign(window, { PALETTES, palette, coverBg, shotBg, PadIcon, SearchIcon, useFitCount });
+/* ── Cola de carga lazy de portadas ─────────────────────────────────────────
+   Máximo 3 llamadas simultáneas a /api/igdb-ficha/. Cada juego se intenta
+   una sola vez; el resultado queda cacheado en memoria para esa sesión.     */
+const _coverCache = {};   // id -> url | null
+const _coverQueue = [];
+let _coverActive  = 0;
+const _MAX_COVER  = 3;
+
+function _runQueue() {
+  while (_coverActive < _MAX_COVER && _coverQueue.length) {
+    const { id, resolve } = _coverQueue.shift();
+    _coverActive++;
+    fetch(`/api/igdb-ficha/?game_id=${id}`)
+      .then(r => r.ok ? r.json() : null)
+      .then(d => {
+        const url = (d && (d.cover_url || d.image_url)) || null;
+        _coverCache[id] = url;
+        resolve(url);
+      })
+      .catch(() => { _coverCache[id] = null; resolve(null); })
+      .finally(() => { _coverActive--; _runQueue(); });
+  }
+}
+
+function fetchCover(gameId) {
+  return new Promise(resolve => {
+    if (gameId in _coverCache) { resolve(_coverCache[gameId]); return; }
+    _coverCache[gameId] = null;   // marca "en vuelo"
+    _coverQueue.push({ id: gameId, resolve });
+    _runQueue();
+  });
+}
+
+Object.assign(window, { PALETTES, palette, coverBg, shotBg, PadIcon, SearchIcon, useFitCount, fetchCover });
