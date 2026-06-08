@@ -145,8 +145,6 @@
             <div class="col-12 col-md-4 col-lg-3 game-banner-image">
                 {% if juego.Image_URL %}
                     <img src="{{ juego.Image_URL }}" alt="Cover of {{ juego.Name }}" class="img-fluid rounded game-cover">
-                {% else %}
-                    <img src="{% static 'img/tech_diff.png' %}" alt="Default game cover" class="img-fluid rounded game-cover default">
                 {% endif %}
             </div>
             

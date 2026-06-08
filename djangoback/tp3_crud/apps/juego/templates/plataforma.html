@@ -111,7 +111,7 @@
       <div class="card">
         <a href="{% url 'detalle_juego' juego_id=juego.id %}" class="card-link">
         <img
-          src="{% if juego.Image_URL %}{{ juego.Image_URL }}{% else %}{% static 'img/tech_diff.png'%}{% endif %}"
+          src="{{ juego.Image_URL }}"
           alt="Portada de {{juego.Name}}"
         />
         <div class="card-info">
