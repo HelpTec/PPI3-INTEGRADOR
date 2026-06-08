@@ -1,9 +1,18 @@
 const { useState, useEffect, useRef } = React;
 const { PadIcon, SearchIcon, Library, Catalog, EmuLibrary, Detail, RealEmulator, Emulator, Profile } = window;
 
-function TopBar({query, setQuery, yearInput, setYearInput, screen, setScreen, onHome, onSearch, onProfile}){
+/* Extrae un año de 4 dígitos (1970-2029) del texto de búsqueda */
+function parseQuery(raw) {
+  const m = (raw || '').match(/\b(19[7-9]\d|20[0-2]\d)\b/);
+  return {
+    text: m ? raw.replace(m[0], '').replace(/\s+/, ' ').trim() : (raw || '').trim(),
+    year: m ? parseInt(m[1]) : null,
+  };
+}
+
+function TopBar({query, setQuery, screen, setScreen, onHome, onSearch, onProfile}){
   const auth = window.GB_AUTH;
-  const submit = (e)=>{ e.preventDefault(); onSearch(query, yearInput); };
+  const submit = (e)=>{ e.preventDefault(); onSearch(query); };
   const onLib    = ()=>{ onHome(); setScreen("lib"); };
   const onEmuLib = ()=>{ onHome(); setScreen("emu-lib"); };
 
@@ -23,12 +32,7 @@ function TopBar({query, setQuery, yearInput, setYearInput, screen, setScreen, on
       <form className="search" onSubmit={submit}>
         <SearchIcon/>
         <input value={query} onChange={e=>setQuery(e.target.value)}
-          placeholder="Buscar juego, plataforma o género…"/>
-        <input
-          type="number" min="1970" max="2029" value={yearInput}
-          onChange={e=>setYearInput(e.target.value)}
-          placeholder="Año"
-          className="year-input"/>
+          placeholder="Buscar juego, plataforma, género o año…"/>
         <kbd>/</kbd>
       </form>
 
@@ -60,7 +64,6 @@ function App(){
   const [catalog, setCatalog] = useState(null);
   const [query,   setQuery]   = useState("");
   const [filter,  setFilter]  = useState("all");
-  const [yearInput, setYearInput] = useState("");
   const [favs, setFavs] = useState(()=>{
     try{
       const raw = JSON.parse(localStorage.getItem("gb_favs")||"{}");
@@ -96,18 +99,19 @@ function App(){
   const play      = (g)=>{ setGame(g); setScreen("emu"); };
 
   const home = ()=>{
-    setQuery(""); setYearInput(""); setSearchResults(null); setSearchPage(1); setCatalog(null);
+    setQuery(""); setSearchResults(null); setSearchPage(1); setCatalog(null);
   };
 
-  const doSearch = (q, plat, yr, page=1, append=false)=>{
-    const hasFilter = q || (plat && plat!=="all") || yr;
+  const doSearch = (q, plat, page=1, append=false)=>{
+    const { text, year } = parseQuery(q);
+    const hasFilter = text || (plat && plat!=="all") || year;
     if(!hasFilter){ setSearchResults(null); return; }
     setIsSearching(true);
     searchQRef.current = q;
     const p = new URLSearchParams();
-    if(q) p.set("q",q);
-    if(plat && plat!=="all") p.set("platform",plat);
-    if(yr){ p.set("year_from", yr); p.set("year_to", yr); }
+    if(text) p.set("q", text);
+    if(plat && plat!=="all") p.set("platform", plat);
+    if(year){ p.set("year_from", year); p.set("year_to", year); }
     p.set("page", page);
     fetch("/api/juegos/?"+p)
       .then(r=>r.json())
@@ -121,8 +125,16 @@ function App(){
       .catch(()=>setIsSearching(false));
   };
 
+  /* Búsqueda en tiempo real con debounce 350ms */
   useEffect(()=>{
-    if(query || yearInput) doSearch(query, filter, yearInput, 1, false);
+    if(!query){ setSearchResults(null); return; }
+    const timer = setTimeout(()=>doSearch(query, filter, 1, false), 350);
+    return ()=>clearTimeout(timer);
+  },[query]);
+
+  /* Si cambia el filtro de plataforma y hay búsqueda activa, refiltra */
+  useEffect(()=>{
+    if(query) doSearch(query, filter, 1, false);
     else setSearchResults(null);
   },[filter]);
 
@@ -144,10 +156,9 @@ function App(){
     <div className="app">
       {showTopBar && (
         <TopBar query={query} setQuery={setQuery}
-          yearInput={yearInput} setYearInput={setYearInput}
           screen={screen} setScreen={setScreen}
           onHome={()=>{ home(); setScreen(s=>s==="emu-lib"?"emu-lib":"lib"); }}
-          onSearch={(q,yr)=>doSearch(q,filter,yr,1,false)}
+          onSearch={(q)=>doSearch(q,filter,1,false)}
           onProfile={()=>setScreen("profile")}/>
       )}
 
@@ -156,7 +167,7 @@ function App(){
           shelves={shelves} platforms={platforms}
           filter={filter} setFilter={p=>{
             setFilter(p);
-            if(p !== "all"){
+            if(p !== "all" && !query){
               const shelf = shelves.find(s=>s.platform===p) || {platform:p, label:p};
               setCatalog(shelf);
               setScreen("catalogo");
@@ -166,7 +177,7 @@ function App(){
           loading={loading}
           searchResults={searchResults} searchTotal={searchTotal}
           isSearching={isSearching}
-          onLoadMore={()=>doSearch(query,filter,yearInput,searchPage+1,true)}
+          onLoadMore={()=>doSearch(query,filter,searchPage+1,true)}
           onSeeAll={shelf=>{ setCatalog(shelf); setScreen("catalogo"); }}
         />
       )}
