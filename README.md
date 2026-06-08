@@ -1,6 +1,6 @@
 # GameBase
 
-Catálogo interactivo de videojuegos con emulador integrado, búsqueda avanzada, fichas enriquecidas desde IGDB y asistente de IA.
+Catálogo interactivo de videojuegos con emulador integrado, búsqueda en tiempo real, fichas enriquecidas desde IGDB y asistente de IA.
 
 > Trabajo Práctico 3 — Práctica Profesional Integrador · Grupo 3
 
@@ -39,15 +39,15 @@ Catálogo interactivo de videojuegos con emulador integrado, búsqueda avanzada,
 ### Biblioteca
 - **16.598 juegos** cargados desde el dataset VGSales al primer inicio
 - **Estanterías por plataforma** (NES, SNES, GB, GBA, N64, PS, PS2, Genesis, DS, Atari 2600)
-- **Buscador en tiempo real** por nombre, plataforma y género, con filtro de año
-- **"Ver todo"** por plataforma con paginación de carga incremental ("cargar más")
-- **Portadas reales** obtenidas de IGDB en batch al iniciar
+- **Buscador unificado en tiempo real** — un solo campo para nombre, plataforma, género y año (ej: `mario 1985`); los resultados aparecen 350ms después de tipear, sin necesidad de apretar Enter
+- **"Ver todo"** por plataforma con paginación incremental ("cargar más")
+- **Portadas lazy**: cuando una tarjeta sin imagen entra al viewport, la app consulta IGDB en segundo plano y muestra la portada al instante (máx. 3 llamadas simultáneas); el resultado queda guardado en la DB para la próxima visita
 
 ### Ficha de juego
 - Datos enriquecidos desde IGDB: portada HD, descripción, puntuaciones de crítica y usuarios, modos de juego, calificación de edad (ESRB/PEGI)
-- **Descripción traducida al español** automáticamente con DeepL (resultado cacheado en la base de datos para no repetir llamadas)
+- **Descripción traducida al español** con DeepL (resultado cacheado en `Summary_ES` para no repetir llamadas)
 - Galería de capturas con lightbox
-- Trailer de YouTube embebido (click para reproducir)
+- Trailer de YouTube embebido
 - Personajes del juego con foto
 - Ficha técnica: desarrolladora, editora, motor, saga, ventas globales
 - **Juegos similares** desde el catálogo propio (mismo género + plataforma, clickeables para navegar directo a su ficha)
@@ -64,12 +64,10 @@ Catálogo interactivo de videojuegos con emulador integrado, búsqueda avanzada,
 - **Juego demo** jugable sin ROM externa (colección de monedas con D-pad)
 - Detección de ROM faltante con instrucción para agregarla
 - Guardar/cargar estados, pantalla completa, controles por teclado y touch
-- Limpieza de audio y memoria al salir del emulador
 
 ### Asistente IA
 - **Chat flotante** (FAB) conectado a Google Gemini 2.5 Flash
 - Responde preguntas sobre juegos, consolas y épocas del catálogo
-- Diseño retro integrado al estilo de la app
 
 ### Autenticación
 - Login con **Google OAuth** (django-allauth)
@@ -88,7 +86,9 @@ Catálogo interactivo de videojuegos con emulador integrado, búsqueda avanzada,
 | django-allauth | Autenticación social (Google OAuth) |
 | Gunicorn | Servidor WSGI para producción |
 | WhiteNoise | Servicio de archivos estáticos en producción |
-| SQLite | Base de datos (desarrollo y producción) |
+| SQLite | Base de datos en desarrollo |
+| PostgreSQL | Base de datos en producción (Render) |
+| dj-database-url | Configuración de DB via `DATABASE_URL` |
 | python-dotenv / python-decouple | Manejo de variables de entorno |
 
 ### Frontend
@@ -141,11 +141,16 @@ Catálogo interactivo de videojuegos con emulador integrado, búsqueda avanzada,
 │       └── services/chat_service.py                      │
 │             get_chat_reply()                            │
 │                                                         │
-│  igdb_api.py   (cliente IGDB + caché de token)          │
+│  igdb_api.py   (cliente IGDB + caché de token Twitch)   │
 │  deepl_translate.py  (cliente DeepL)                    │
 │                                                         │
 │  models.py: Juego (16.598 registros VGSales)            │
 └─────────────┬───────────────────────────────────────────┘
+              │
+    ┌─────────▼────────────────────────────────────┐
+    │  Base de datos                               │
+    │  SQLite (dev) · PostgreSQL (producción)      │
+    └─────────┬────────────────────────────────────┘
               │
     ┌─────────▼──────────────────────────────┐
     │   APIs externas                        │
@@ -154,9 +159,9 @@ Catálogo interactivo de videojuegos con emulador integrado, búsqueda avanzada,
 ```
 
 ### Principios de diseño
-- **Separación de responsabilidades**: las vistas no tienen lógica de negocio; la lógica vive en la capa `services/`
+- **Separación de responsabilidades**: las vistas no tienen lógica de negocio; la lógica vive en `services/`
 - **Frontend modular**: el JS está dividido en 6 archivos estáticos cargados secuencialmente; sin bundler ni paso de build
-- **Caché de datos externos**: el token de Twitch, las portadas y las traducciones se persisten para no repetir llamadas a APIs de pago
+- **Caché de datos externos**: el token de Twitch, las portadas y las traducciones se persisten en la DB para no repetir llamadas
 
 ---
 
@@ -201,12 +206,15 @@ Abrí http://127.0.0.1:8000 en el navegador.
 
 ## Variables de entorno
 
-Crear el archivo `.env` en `djangoback/tp3_crud/` con el siguiente contenido:
+Crear el archivo `.env` en `djangoback/tp3_crud/` (ver `.env.example`):
 
 ```env
 # Django
 SECRET_KEY=tu_secret_key_de_django
 DEBUG=True
+
+# Base de datos (opcional en desarrollo — sin esta variable usa SQLite local)
+# DATABASE_URL=postgresql://user:pass@host/dbname
 
 # IGDB / Twitch — https://api.igdb.com (crear app en dev.twitch.tv)
 TWITCH_CLIENT_ID=tu_client_id
@@ -238,12 +246,12 @@ GOOGLE_CLIENT_SECRET=tu_client_secret
 
 ## Correr los tests
 
-Los tests se ubican en `apps/juego/test_*.py` y usan la base de datos en memoria (SQLite). No requieren conexión a internet ni claves de API (los externos están mockeados).
+Los tests se ubican en `apps/juego/test_*.py` y usan la base de datos en memoria. No requieren conexión a internet ni claves de API (las dependencias externas están mockeadas).
 
 ```bash
 # Desde djangoback/tp3_crud/
 
-# Todos los tests (54)
+# Todos los tests
 python manage.py test apps.juego.test_game_service apps.juego.test_igdb_service apps.juego.test_chat_service apps.juego.test_views
 
 # Por módulo
@@ -256,14 +264,14 @@ python manage.py test apps.juego.test_views          # capa HTTP / endpoints
 python manage.py test apps.juego --verbosity=2
 ```
 
-### Cobertura actual
+### Cobertura
 
 | Archivo | Tests | Qué cubre |
 |---|---|---|
 | `test_game_service.py` | 21 | `game_dict`, `search_games`, `get_shelves` |
-| `test_igdb_service.py` | 18 | Enriquecimiento, caché de traducción, similares DB, persistencia de campos |
-| `test_chat_service.py` | 7 | Validaciones, clave faltante, integración con Gemini (mockeado) |
-| `test_views.py` | 15 | Autenticación, códigos HTTP, modo búsqueda vs estantes |
+| `test_igdb_service.py` | 19 | Enriquecimiento, caché de traducción, similares DB, persistencia |
+| `test_chat_service.py` | 7 | Validaciones, clave faltante, integración Gemini (mockeada) |
+| `test_views.py` | 16 | Autenticación, códigos HTTP, modo búsqueda vs estantes |
 
 ---
 
@@ -276,11 +284,11 @@ PPI3-INTEGRADOR/
 │   └── tp3_crud/
 │       ├── manage.py
 │       ├── requirements.txt
-│       ├── .env                    # Variables de entorno (no subir al repo)
+│       ├── .env.example            # Plantilla de variables de entorno
 │       ├── build.sh                # Script de build para Render
 │       │
 │       ├── tp3_crud/               # Configuración Django
-│       │   ├── settings.py
+│       │   ├── settings.py         # DB: SQLite en dev, PostgreSQL en prod (DATABASE_URL)
 │       │   ├── urls.py
 │       │   └── wsgi.py
 │       │
@@ -294,22 +302,21 @@ PPI3-INTEGRADOR/
 │       │   │   ├── igdb_service.py     # Enriquecimiento + similares DB
 │       │   │   └── chat_service.py     # Respuestas Gemini
 │       │   │
-│       │   ├── views/              # Capa HTTP (solo parseo + respuesta)
-│       │   │   ├── api.py          # Endpoints JSON
-│       │   │   ├── juegos.py       # Vistas de plantilla
-│       │   │   ├── auth.py         # Login / registro
-│       │   │   ├── detalle.py      # Vista detalle (plantilla)
-│       │   │   └── mixins.py       # Mixin de enriquecimiento de imágenes
+│       │   ├── views/              # Capa HTTP (parseo + respuesta)
+│       │   │   ├── api.py          # Endpoints JSON (juegos, ficha, chat)
+│       │   │   └── auth.py         # Login / registro
 │       │   │
 │       │   ├── templates/
-│       │   │   └── gamebase.html   # Shell de la SPA React
+│       │   │   ├── gamebase.html   # Shell de la SPA React
+│       │   │   ├── login.html
+│       │   │   └── register.html
 │       │   │
 │       │   ├── fixtures/
 │       │   │   └── vgsales.json    # Dataset de 16.598 juegos
 │       │   │
 │       │   ├── migrations/
 │       │   ├── management/commands/
-│       │   │   └── fetch_shelf_covers.py  # Comando para poblar portadas en batch
+│       │   │   └── fetch_shelf_covers.py  # Poblar portadas en batch
 │       │   │
 │       │   └── test_*.py           # Tests unitarios por módulo
 │       │
@@ -318,15 +325,15 @@ PPI3-INTEGRADOR/
 │           │   ├── gb-hifi.css     # Estilos base (pixel art / Game Boy)
 │           │   └── gb-app.css      # Estilos de componentes React
 │           ├── js/
-│           │   ├── gb-utils.js     # Paletas, íconos, helpers
-│           │   ├── gb-components.js # Card, Shelf, Library, Catalog, Profile
+│           │   ├── gb-utils.js     # Paletas, íconos, helpers, cola de portadas lazy
+│           │   ├── gb-components.js # Card (con lazy cover), Shelf, Library, Catalog, Profile
 │           │   ├── gb-detail.js    # Componente ficha de juego
 │           │   ├── gb-emulator.js  # Emulador (demo + EmulatorJS)
-│           │   ├── gb-app.js       # TopBar, App, punto de entrada React
+│           │   ├── gb-app.js       # TopBar, App, buscador unificado
 │           │   └── gb-chat.js      # Chat FAB (vanilla JS)
 │           ├── img/
 │           │   └── favicon.svg
-│           └── roms/               # Archivos ROM (.nes) — no incluidos en repo
+│           └── roms/               # Archivos ROM (.nes)
 ```
 
 ---
@@ -336,17 +343,17 @@ PPI3-INTEGRADOR/
 ### IGDB (Twitch)
 Proveedor principal de metadatos de juegos.
 
-- **Autenticación:** OAuth2 client_credentials (token cacheado en `twitch_token.json`)
-- **Datos obtenidos:** portada, descripción, screenshots, videos/trailers, personajes, juegos similares, calificaciones, modos de juego, plataformas, sagas, motores, ratings de edad (ESRB/PEGI)
-- **Estrategia de búsqueda:** primero por ID exacto; si no hay ID, búsqueda exacta por nombre (excluyendo hacks/ports), con fallback a búsqueda fuzzy
+- **Autenticación:** OAuth2 client_credentials (token cacheado en memoria y en `twitch_token.json`)
+- **Datos obtenidos:** portada, descripción, screenshots, trailers, personajes, juegos similares, calificaciones, modos de juego, sagas, motores, ratings de edad (ESRB/PEGI)
+- **Estrategia de búsqueda:** primero por ID exacto; si no hay ID, búsqueda exacta por nombre, con fallback fuzzy
 - **Endpoint:** `https://api.igdb.com/v4/games`
 - **Documentación:** https://api-docs.igdb.com
 
 ### DeepL
-Traducción automática de descripciones de juegos al español.
+Traducción automática de descripciones al español.
 
 - **Plan:** Free (500.000 caracteres/mes)
-- **Caché:** el resultado se guarda en el campo `Summary_ES` del modelo para no re-traducir
+- **Caché:** el resultado se guarda en `Summary_ES` del modelo para no re-traducir
 - **Endpoint:** `https://api-free.deepl.com/v2/translate`
 - **Documentación:** https://developers.deepl.com/docs
 
@@ -358,10 +365,10 @@ Motor del asistente IA de chat.
 - **Documentación:** https://ai.google.dev/docs
 
 ### EmulatorJS
-Emulación de consolas retro en el navegador (cargado dinámicamente).
+Emulación de consolas retro en el navegador.
 
 - **CDN:** `https://cdn.emulatorjs.org/stable/data/`
-- **Núcleos soportados por la app:** `nes` (en uso), `snes`, `gb`, `gbc`, `gba`, `segaMD`, `n64`, `psx`
+- **Núcleos soportados:** `nes` (en uso), `snes`, `gb`, `gbc`, `gba`, `segaMD`, `n64`, `psx`
 - **Documentación:** https://emulatorjs.org/docs
 
 ---
@@ -372,23 +379,24 @@ El proyecto está configurado para deploy automático en [Render](https://render
 
 ### Variables de entorno requeridas en Render
 
-Además de las del `.env` local, configurar en el dashboard de Render:
-
 | Variable | Valor |
 |---|---|
-| `SECRET_KEY` | Generado automáticamente por Render |
+| `SECRET_KEY` | Clave secreta de Django |
 | `DEBUG` | `False` |
-| `ALLOWED_HOSTS` | `.onrender.com` |
-| `CSRF_TRUSTED_ORIGINS` | `https://gamebase.onrender.com` |
-| `TWITCH_CLIENT_ID` | Tu Client ID de Twitch |
-| `TWITCH_CLIENT_SECRET` | Tu Client Secret de Twitch |
-| `DEEPL_API_KEY` | Tu clave DeepL |
-| `GEMINI_API_KEY` | Tu clave Gemini |
-| `GOOGLE_CLIENT_ID` | Tu Client ID de Google |
-| `GOOGLE_CLIENT_SECRET` | Tu Client Secret de Google |
+| `DATABASE_URL` | Internal URL de la base PostgreSQL de Render |
+| `TWITCH_CLIENT_ID` | Client ID de Twitch |
+| `TWITCH_CLIENT_SECRET` | Client Secret de Twitch |
+| `DEEPL_API_KEY` | Clave DeepL |
+| `GEMINI_API_KEY` | Clave Gemini |
+| `GOOGLE_CLIENT_ID` | Client ID de Google OAuth |
+| `GOOGLE_CLIENT_SECRET` | Client Secret de Google OAuth |
+
+### Base de datos en Render
+Crear una base PostgreSQL gratuita en Render → copiar la **Internal Database URL** → pegarla como `DATABASE_URL` en las variables del servicio web.
+
+El sistema detecta `DATABASE_URL` automáticamente y usa PostgreSQL en producción, SQLite en desarrollo.
 
 ### Build
-
 El archivo `build.sh` ejecuta:
 ```bash
 pip install -r requirements.txt
@@ -396,19 +404,28 @@ python manage.py collectstatic --no-input
 python manage.py migrate
 ```
 
-### Consideraciones de producción
-- **Archivos estáticos:** servidos por WhiteNoise directamente desde Gunicorn (sin Nginx adicional)
-- **Base de datos:** SQLite en disco (suficiente para el proyecto; para producción real, migrar a PostgreSQL)
-- **Token Twitch:** el token se guarda en `twitch_token.json`; en Render el filesystem es efímero, por lo que el token se re-obtiene en cada deploy (automático, sin intervención)
+### Poblar portadas en producción
+Dado que el plan gratuito de Render no incluye shell interactiva, conectarse a la DB de Render desde local usando la **External Database URL**:
+
+```powershell
+$env:DATABASE_URL="postgresql://...external-url..."
+$env:TWITCH_CLIENT_ID="tu_client_id"
+$env:TWITCH_CLIENT_SECRET="tu_client_secret"
+python manage.py fetch_shelf_covers
+```
+
+### Configurar Google OAuth en producción
+Agregar el redirect URI de producción en Google Cloud Console → Credenciales → OAuth 2.0:
+```
+https://<tu-app>.onrender.com/accounts/google/login/callback/
+```
 
 ---
 
 ## Agregar ROMs
 
-El emulador funciona con cualquier ROM compatible con los núcleos de EmulatorJS. Para agregar un juego:
-
-1. Copiar el archivo `.nes` (u otro formato) a `djangoback/tp3_crud/static/roms/`
-2. Editar `static/js/gb-emulator.js`, agregar una entrada al array `EMULABLES`:
+1. Copiar el archivo `.nes` a `djangoback/tp3_crud/static/roms/`
+2. Agregar una entrada al array `EMULABLES` en `static/js/gb-emulator.js`:
 
 ```js
 {
@@ -422,9 +439,7 @@ El emulador funciona con cualquier ROM compatible con los núcleos de EmulatorJS
 }
 ```
 
-3. La app detecta automáticamente si la ROM está disponible y muestra el botón correspondiente.
-
-> **Nota:** Solo incluir ROMs de dominio público o homebrew. No distribuir ROMs con copyright.
+> Solo incluir ROMs de dominio público o homebrew. No distribuir ROMs con copyright.
 
 ---
 
@@ -436,9 +451,6 @@ python manage.py fetch_shelf_covers
 
 # Solo las primeras N por plataforma
 python manage.py fetch_shelf_covers --limit 10
-
-# Poblar portadas de todos los juegos (lento, usa rate limiting de IGDB)
-python manage.py fetch_shelf_covers --all
 ```
 
 ---
