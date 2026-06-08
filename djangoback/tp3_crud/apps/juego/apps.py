@@ -1,6 +1,6 @@
 import json
 import os
-from django.db.utils import OperationalError
+from django.db.utils import OperationalError, ProgrammingError
 from django.apps import AppConfig
 
 
@@ -19,5 +19,5 @@ class JuegoConfig(AppConfig):
                     datos = json.load(archivo)
                     for juego_data in datos:
                         Juego.objects.create(**juego_data)
-        except OperationalError:
+        except (OperationalError, ProgrammingError):
             pass
